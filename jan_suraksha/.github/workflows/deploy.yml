@@ -1,17 +1,35 @@
-- name: FTP-Deploy-Action
+name: Deploy to InfinityFree
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  FTP-Deploy-Action:
+    name: FTP-Deploy-Action
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4.1.7
+      with:
+        fetch-depth: 2
+
+    - name: FTP-Deploy-Action
       uses: SamKirkland/FTP-Deploy-Action@4.3.5
       with:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         
-        # 1. This uploads ONLY the content inside the folder, not the folder itself
+        # 🟢 CRITICAL FIX: This tells GitHub to look inside your folder
         local-dir: ./jan_suraksha/
         
-        # 2. Upload to the main public folder on InfinityFree
+        # This puts the files directly on your main website
         server-dir: ./htdocs/
         
-        # 3. Fix the exclude rule to match where the file actually is
+        # This deletes old files so you don't have duplicate folders
+        dangerous-clean-slate: true
+        
+        # This ensures the 'localhost' config from your contributor is IGNORED
         exclude: |
           **/.git*
           **/.git*/**
