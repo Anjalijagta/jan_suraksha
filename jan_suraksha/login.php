@@ -195,8 +195,6 @@ body {
   background: #e2e8f0;
   color: #475569;
 }
-git
-
 
 </style>
 </head>
