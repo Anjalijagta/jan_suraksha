@@ -38,13 +38,17 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 <style>
-  body {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
+body {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
   
   .auth-card {
     background: white;
@@ -190,13 +194,15 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     border-radius: 10px;
     border: none;
   }
+
+
 </style>
 </head>
 <body>
 <a href="index.php" class="back-home">
   <i class="bi bi-arrow-left"></i> Back to Home
 </a>
-<div class="container">
+<div class="container register-container">
   <div class="row justify-content-center">
     <div class="col-md-6 col-lg-5">
       <div class="auth-card">
@@ -208,27 +214,50 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
           <?php if($err): ?><div class="alert alert-danger"><?=e($err)?></div><?php endif; ?>
     <form method="post" id="registerForm" novalidate>
       <div class="mb-3">
-        <label class="form-label">Full Name</label>
-        <input class="form-control" name="name" type="text" autocomplete="name" placeholder="Enter your full name">
-    </div>
+  <label class="form-label">Full Name</label>
+  <input class="form-control" name="name" type="text" autocomplete="name" placeholder="Enter your full name">
+  <div class="invalid-feedback">Please enter your full name.</div>
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Mobile Number</label>
+  <input class="form-control" name="mobile" type="tel" autocomplete="tel"
+         placeholder="10 digit mobile number" maxlength="10">
+  <div class="invalid-feedback">Enter a valid 10 digit mobile number.</div>
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Email Address</label>
+  <input class="form-control" name="email" type="email" autocomplete="email"
+         placeholder="your.email@example.com">
+  <div class="invalid-feedback">Enter a valid email address.</div>
+</div>
+
       <div class="mb-3">
-        <label class="form-label">Mobile Number</label>
-        <input class="form-control" name="mobile" type="tel" autocomplete="tel" placeholder="10 digit mobile number" maxlength="10">
-    </div>
-      <div class="mb-3">
-        <label class="form-label">Email Address</label>
-        <input class="form-control" name="email" type="email" autocomplete="email" placeholder="your.email@example.com">
-        
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Password</label>
-        <input class="form-control" name="password" type="password" autocomplete="new-password" placeholder="Create a strong password">
-        
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Confirm Password</label>
-        <input class="form-control" name="confirm" type="password" autocomplete="new-password" placeholder="Re-enter your password">
-      </div>
+  <label class="form-label">Password</label>
+  <div class="input-group">
+    <input class="form-control" id="passwordField" name="password" type="password"
+           autocomplete="new-password" placeholder="Create a strong password"
+           minlength="6" required>
+    <button class="btn input-group-text" type="button" id="togglePassword">
+      <i class="bi bi-eye" id="toggleIcon"></i>
+    </button>
+  </div>
+  <div class="invalid-feedback">Password must be at least 6 characters.</div>
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Confirm Password</label>
+  <div class="input-group">
+    <input class="form-control" id="confirmField" name="confirm" type="password"
+           autocomplete="new-password" placeholder="Re-enter your password" required>
+    <button class="btn input-group-text" type="button" id="toggleConfirm">
+      <i class="bi bi-eye" id="toggleConfirmIcon"></i>
+    </button>
+  </div>
+  <div class="invalid-feedback">Passwords must match.</div>
+</div>
+
       <button class="btn btn-primary w-100" type="submit">
         <i class="bi bi-person-plus-fill me-2"></i>Create Account
       </button>
@@ -242,4 +271,87 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
   </div>
 </div>
 <script src="js/main.js"></script>
-</body></html>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('registerForm');
+  const nameInput = form.querySelector('input[name="name"]');
+  const mobileInput = form.querySelector('input[name="mobile"]');
+  const emailInput = form.querySelector('input[name="email"]');
+  const passwordInput = document.getElementById('passwordField');
+  const confirmInput = document.getElementById('confirmField');
+
+  const togglePasswordBtn = document.getElementById('togglePassword');
+  const toggleConfirmBtn = document.getElementById('toggleConfirm');
+
+  // Show / hide password
+  togglePasswordBtn.addEventListener('click', function () {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    document.getElementById('toggleIcon').className =
+      isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
+  });
+
+  toggleConfirmBtn.addEventListener('click', function () {
+    const isPassword = confirmInput.type === 'password';
+    confirmInput.type = isPassword ? 'text' : 'password';
+    document.getElementById('toggleConfirmIcon').className =
+      isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
+  });
+
+  form.addEventListener('submit', function (e) {
+    let hasError = false;
+
+    [nameInput, mobileInput, emailInput, passwordInput, confirmInput].forEach(el => {
+      el.classList.remove('is-invalid', 'is-valid');
+    });
+
+    // Name required
+    if (!nameInput.value.trim()) {
+      nameInput.classList.add('is-invalid');
+      hasError = true;
+    } else {
+      nameInput.classList.add('is-valid');
+    }
+
+    // Mobile: 10 digits
+    const mobileDigits = mobileInput.value.replace(/\D+/g, '');
+    if (!/^\d{10}$/.test(mobileDigits)) {
+      mobileInput.classList.add('is-invalid');
+      hasError = true;
+    } else {
+      mobileInput.classList.add('is-valid');
+    }
+
+    // Email
+    if (!emailInput.value.trim() || !emailInput.checkValidity()) {
+      emailInput.classList.add('is-invalid');
+      hasError = true;
+    } else {
+      emailInput.classList.add('is-valid');
+    }
+
+    // Password length
+    if (!passwordInput.value.trim() || passwordInput.value.length < 6) {
+      passwordInput.classList.add('is-invalid');
+      hasError = true;
+    } else {
+      passwordInput.classList.add('is-valid');
+    }
+
+    // Confirm matches
+    if (!confirmInput.value.trim() || confirmInput.value !== passwordInput.value) {
+      confirmInput.classList.add('is-invalid');
+      hasError = true;
+    } else {
+      confirmInput.classList.add('is-valid');
+    }
+
+    if (hasError) {
+      e.preventDefault();
+    }
+  });
+});
+</script>
+<script src="js/main.js"></script>
+</body>
+</html>
