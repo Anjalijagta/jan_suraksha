@@ -137,6 +137,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 <li class="nav-item"><a class="nav-link" href="about-us.php">About Us</a></li>
                 <li class="nav-item"><a class="nav-link" href="blog.php">Blog</a></li>
                 <li class="nav-item"><a class="nav-link" href="feedback.php">Feedback</a></li>
+                <li class="nav-item"><a class="nav-link" href="faq.php">FAQ / Help</a></li>
             </ul>
             <ul class="navbar-nav ms-auto">
                 <?php if(empty($_SESSION['user_id'])): ?>
@@ -263,6 +264,7 @@ if (session_status() === PHP_SESSION_NONE) {
                     <li class="mb-2"><a href="track-status.php">Track a Complaint</a></li>
                     <li class="mb-2"><a href="blog.php">Awareness Blog</a></li>
                     <li class="mb-2"><a href="about-us.php">About Us</a></li>
+                    <li class="mb-2"><a href="faq.php">FAQ / Help</a></li>
                 </ul>
             </div>
             <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
