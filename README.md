@@ -1,7 +1,7 @@
 
 # 🛡️ Jan Suraksha - Online Crime Reporting Portal
 
-![Jan Suraksha Banner](https://via.placeholder.com/1000x300?text=Jan+Suraksha+Portal+-+Making+India+Safer)
+![Jan Suraksha Banner](/jan_suraksha/banner.png)
 
 
 ![Language](https://img.shields.io/badge/Language-PHP-blue?style=for-the-badge&logo=php&logoColor=white)
