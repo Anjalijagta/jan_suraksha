@@ -36,9 +36,7 @@ $state_hotspots_query = run_query("SELECT state, COUNT(*) as count FROM complain
 $state_hotspots = [];
 $res = run_query("SELECT COUNT(*) as c FROM complaints WHERE state IS NOT NULL AND state != ''");
 $total_state_complaints = ($res) ? ($res->fetch_assoc()['c'] ?? 0) : 0;
-if($state_hotspots_query){
-    while($row = $state_hotspots_query->fetch_assoc()){ $state_hotspots[] = $row; }
-}
+$state_hotspots_query = run_query("SELECT state, COUNT(*) as count FROM complaints WHERE state IS NOT NULL AND state != '' GROUP BY state ORDER BY count DESC LIMIT 4");
 
 // 3. Daily Reports (Last 30 days)
 $daily_reports_query = run_query("SELECT DATE(created_at) as report_date, COUNT(*) as count FROM complaints WHERE created_at >= CURDATE() - INTERVAL 30 DAY GROUP BY report_date ORDER BY report_date ASC");
