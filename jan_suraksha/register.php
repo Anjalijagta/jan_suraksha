@@ -24,11 +24,13 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $ins = $mysqli->prepare('INSERT INTO users (name,mobile,email,password_hash,created_at) VALUES (?,?,?,?,NOW())');
             $ins->bind_param('ssss',$name,$mobile,$email,$hash);
-            $ins->execute();
-            // mysqli_stmt doesn't expose insert_id; use $mysqli->insert_id
-            $_SESSION['user_id'] = $mysqli->insert_id;
-            $_SESSION['user_name'] = $name;
-            header('Location: profile.php'); exit;
+            if($ins->execute()) {
+                // Registration successful - redirect to success page
+                header('Location: register-success.php'); 
+                exit;
+            } else {
+                $err = 'Error creating account. Please try again.';
+            }
         }
     }
 }
@@ -212,65 +214,60 @@ body {
         </div>
         <div class="auth-body">
           <?php if($err): ?><div class="alert alert-danger"><?=e($err)?></div><?php endif; ?>
-    <form method="post" id="registerForm" novalidate>
-      <div class="mb-3">
-  <label class="form-label">Full Name</label>
-  <input class="form-control" name="name" type="text" autocomplete="name" placeholder="Enter your full name">
-  <div class="invalid-feedback">Please enter your full name.</div>
-</div>
+          <form method="post" id="registerForm" novalidate>
+            <div class="mb-3">
+              <label class="form-label">Full Name</label>
+              <input class="form-control" name="name" type="text" autocomplete="name" placeholder="Enter your full name" required>
+              <div class="invalid-feedback">Please enter your full name.</div>
+            </div>
 
-<div class="mb-3">
-  <label class="form-label">Mobile Number</label>
-  <input class="form-control" name="mobile" type="tel" autocomplete="tel"
-         placeholder="10 digit mobile number" maxlength="10">
-  <div class="invalid-feedback">Enter a valid 10 digit mobile number.</div>
-</div>
+            <div class="mb-3">
+              <label class="form-label">Mobile Number</label>
+              <input class="form-control" name="mobile" type="tel" autocomplete="tel" placeholder="10 digit mobile number" maxlength="10" required>
+              <div class="invalid-feedback">Enter a valid 10 digit mobile number.</div>
+            </div>
 
-<div class="mb-3">
-  <label class="form-label">Email Address</label>
-  <input class="form-control" name="email" type="email" autocomplete="email"
-         placeholder="your.email@example.com">
-  <div class="invalid-feedback">Enter a valid email address.</div>
-</div>
+            <div class="mb-3">
+              <label class="form-label">Email Address</label>
+              <input class="form-control" name="email" type="email" autocomplete="email" placeholder="your.email@example.com" required>
+              <div class="invalid-feedback">Enter a valid email address.</div>
+            </div>
 
-      <div class="mb-3">
-  <label class="form-label">Password</label>
-  <div class="input-group">
-    <input class="form-control" id="passwordField" name="password" type="password"
-           autocomplete="new-password" placeholder="Create a strong password"
-           minlength="6" required>
-    <button class="btn input-group-text" type="button" id="togglePassword">
-      <i class="bi bi-eye" id="toggleIcon"></i>
-    </button>
-  </div>
-  <div class="invalid-feedback">Password must be at least 6 characters.</div>
-</div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <div class="input-group">
+                <input class="form-control" id="passwordField" name="password" type="password" autocomplete="new-password" placeholder="Create a strong password" minlength="6" required>
+                <button class="btn input-group-text" type="button" id="togglePassword">
+                  <i class="bi bi-eye" id="toggleIcon"></i>
+                </button>
+              </div>
+              <div class="invalid-feedback">Password must be at least 6 characters.</div>
+            </div>
 
-<div class="mb-3">
-  <label class="form-label">Confirm Password</label>
-  <div class="input-group">
-    <input class="form-control" id="confirmField" name="confirm" type="password"
-           autocomplete="new-password" placeholder="Re-enter your password" required>
-    <button class="btn input-group-text" type="button" id="toggleConfirm">
-      <i class="bi bi-eye" id="toggleConfirmIcon"></i>
-    </button>
-  </div>
-  <div class="invalid-feedback">Passwords must match.</div>
-</div>
+            <div class="mb-3">
+              <label class="form-label">Confirm Password</label>
+              <div class="input-group">
+                <input class="form-control" id="confirmField" name="confirm" type="password" autocomplete="new-password" placeholder="Re-enter your password" required>
+                <button class="btn input-group-text" type="button" id="toggleConfirm">
+                  <i class="bi bi-eye" id="toggleConfirmIcon"></i>
+                </button>
+              </div>
+              <div class="invalid-feedback">Passwords must match.</div>
+            </div>
 
-      <button class="btn btn-primary w-100" type="submit">
-        <i class="bi bi-person-plus-fill me-2"></i>Create Account
-      </button>
-    </form>
-    <div class="auth-footer">
-      <p class="mb-0">Already have an account? <a href="login.php">Login here</a></p>
-    </div>
+            <button class="btn btn-primary w-100" type="submit">
+              <i class="bi bi-person-plus-fill me-2"></i>Create Account
+            </button>
+          </form>
+          <div class="auth-footer">
+            <p class="mb-0">Already have an account? <a href="login.php">Login here</a></p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-<script src="js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const form = document.getElementById('registerForm');
@@ -352,6 +349,5 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
-<script src="js/main.js"></script>
 </body>
 </html>

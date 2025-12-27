@@ -641,6 +641,11 @@ if (session_status() === PHP_SESSION_NONE) {
               <i class="bi bi-chat-dots-fill me-1"></i> Feedback
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'faq.php' ? 'active' : ''; ?>" href="faq.php">
+              <i class="bi bi-question-circle-fill me-1"></i> FAQ
+            </a>
+          </li>
         </ul>
 
         <ul class="navbar-nav ms-auto align-items-center">

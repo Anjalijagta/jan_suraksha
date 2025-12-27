@@ -4,19 +4,33 @@ $err = '';
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $id = trim($_POST['id'] ?? '');
     $password = $_POST['password'] ?? '';
-    if(!$id || !$password){ $err = 'Fill both fields.'; }
+    if(!$id || !$password){ 
+        $err = 'Fill both fields.'; 
+    }
     else {
         $stmt = $mysqli->prepare('SELECT id,name,password_hash FROM users WHERE email=? OR mobile=?');
-        $stmt->bind_param('ss',$id,$id);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        if($row = $res->fetch_assoc()){
-            if(password_verify($password, $row['password_hash'])){
-                $_SESSION['user_id'] = $row['id'];
-                $_SESSION['user_name'] = $row['name'];
-                header('Location: profile.php'); exit;
-            } else { $err = 'Invalid credentials.'; }
-        } else { $err = 'Invalid credentials.'; }
+        if(!$stmt) {
+            $err = 'Database error: ' . $mysqli->error;
+        } else {
+            $stmt->bind_param('ss',$id,$id);
+            if(!$stmt->execute()) {
+                $err = 'Database error: ' . $stmt->error;
+            } else {
+                $res = $stmt->get_result();
+                if($row = $res->fetch_assoc()){
+                    if(password_verify($password, $row['password_hash'])){
+                        $_SESSION['user_id'] = $row['id'];
+                        $_SESSION['user_name'] = $row['name'];
+                        header('Location: profile.php'); 
+                        exit;
+                    } else { 
+                        $err = 'Invalid credentials.'; 
+                    }
+                } else { 
+                    $err = 'Invalid credentials.'; 
+                }
+            }
+        }
     }
 }
 ?>
@@ -213,38 +227,37 @@ body {
         </div>
         <div class="auth-body">
           <?php if($err): ?><div class="alert alert-danger"><?=e($err)?></div><?php endif; ?>
-    <form method="post" id="loginForm" novalidate>
-      <div class="mb-3">
-        <label class="form-label">Email or Mobile Number</label>
-        <input class="form-control" name="id" type="text" autocomplete="username" placeholder="Enter email or mobile number">
-        <div class="invalid-feedback">Please enter your email or mobile number.</div>
-      </div>
+          <form method="post" id="loginForm" novalidate>
+            <div class="mb-3">
+              <label class="form-label">Email or Mobile Number</label>
+              <input class="form-control" name="id" type="text" autocomplete="username" placeholder="Enter email or mobile number" required>
+              <div class="invalid-feedback">Please enter your email or mobile number.</div>
+            </div>
 
-      <div class="mb-3">
-        <label class="form-label">Password</label>
-        <div class="input-group">
-          <input class="form-control" id="passwordField" name="password" type="password"
-                 autocomplete="current-password" placeholder="Enter your password" required minlength="6">
-          <button class="btn input-group-text" type="button" id="togglePassword">
-            <i class="bi bi-eye" id="toggleIcon"></i>
-          </button>
-        </div>
-        <div class="invalid-feedback">Password must be at least 6 characters.</div>
-      </div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <div class="input-group">
+                <input class="form-control" id="passwordField" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required minlength="6">
+                <button class="btn input-group-text" type="button" id="togglePassword">
+                  <i class="bi bi-eye" id="toggleIcon"></i>
+                </button>
+              </div>
+              <div class="invalid-feedback">Password must be at least 6 characters.</div>
+            </div>
 
-      <button class="btn btn-primary w-100" type="submit">
-        <i class="bi bi-box-arrow-in-right me-2"></i>Login
-      </button>
-    </form>
-    <div class="auth-footer">
-      <p class="mb-0">Don't have an account? <a href="register.php">Register here</a></p>
-    </div>
+            <button class="btn btn-primary w-100" type="submit">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Login
+            </button>
+          </form>
+          <div class="auth-footer">
+            <p class="mb-0">Don't have an account? <a href="register.php">Register here</a></p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-<script src="js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const form = document.getElementById('loginForm');
@@ -252,12 +265,12 @@ document.addEventListener('DOMContentLoaded', function () {
   const passwordInput = document.getElementById('passwordField');
   const togglePasswordBtn = document.getElementById('togglePassword');
 
- togglePasswordBtn.addEventListener('click', function () {
-  const isPassword = passwordInput.type === 'password';
-  passwordInput.type = isPassword ? 'text' : 'password';
-  const icon = document.getElementById('toggleIcon');
-  icon.className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
-});
+  togglePasswordBtn.addEventListener('click', function () {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    const icon = document.getElementById('toggleIcon');
+    icon.className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
+  });
 
   // Simple client-side validation
   form.addEventListener('submit', function (e) {
@@ -290,7 +303,6 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
-<script src="js/main.js"></script>
 </body>
 </html>
 
