@@ -41,7 +41,7 @@ In many scenarios, citizens hesitate to report crimes due to fear or procedural 
 
 ## 🔗 Live Demo
 Check out the live project here:  
-👉 **https://jan-suraksha.infinityfreeapp.com/**
+👉 **https://jansuraksha.infinityfreeapp.com/**
 
 ---
 
