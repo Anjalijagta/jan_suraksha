@@ -36,6 +36,7 @@ footer.footer-main.visible {
     max-width: 1700px;
     margin: auto;
     padding: 1.5rem 1rem;
+    position: relative; /* Added for scroll button positioning */
 }
 
 .bg-white {
@@ -45,6 +46,52 @@ footer.footer-main.visible {
 @media (max-width: 576px) {
     .footer-inner {
         padding: 1rem 0.75rem;
+    }
+}
+
+/* Scroll Button Styles */
+.scroll-btn-container {
+    pointer-events: auto;
+    position: absolute;
+    top: -10px; /* Slightly above footer */
+    right: 20px;
+}
+
+#scrollBtn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #2563eb !important;
+    color: white !important;
+    border: none !important;
+    font-size: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    cursor: pointer;
+    z-index: 1001;
+}
+
+#scrollBtn.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+#scrollBtn:hover {
+    transform: scale(1.1);
+    background: #1e40af !important;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+}
+
+@media (max-width: 768px) {
+    .scroll-btn-container {
+        right: 15px;
+    }
+    #scrollBtn {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
     }
 }
 </style>
@@ -105,8 +152,16 @@ footer.footer-main.visible {
                 </div>
             </div>
 
+            <!-- Scroll Button -->
+            <div class="scroll-btn-container">
+                <button id="scrollBtn" aria-label="Scroll navigation" title="Scroll to top/bottom">
+                    <span class="scroll-icon" aria-hidden="true">⬆</span>
+                </button>
+            </div>
+
+            <!-- Copyright -->
             <div class="text-center text-white small mt-2 p-2 bg-dark bg-opacity-50">
-                &copy; <?= date('Y') ?> Jan Suraksha Portal. All Rights Reserved.
+                © <?= date('Y') ?> Jan Suraksha Portal. All Rights Reserved.
             </div>
         </div>
     </div>
@@ -115,7 +170,10 @@ footer.footer-main.visible {
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const footer = document.querySelector('.footer-main');
-    if (!footer) return;
+    const scrollBtn = document.getElementById('scrollBtn');
+    if (!footer || !scrollBtn) return;
+
+    let isAtTop = true;
 
     function toggleFooter() {
         const scrollTop = window.scrollY;
@@ -134,9 +192,34 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.paddingBottom = footerHeight + 'px';
     }
 
-    window.addEventListener('scroll', toggleFooter);
+    function handleScroll() {
+        toggleFooter();
+        
+        // Scroll button logic
+        if (window.scrollY > 300) {
+            scrollBtn.classList.add('show');
+        } else {
+            scrollBtn.classList.remove('show');
+        }
+        
+        isAtTop = window.scrollY === 0;
+        scrollBtn.querySelector('.scroll-icon').textContent = isAtTop ? '⬇' : '⬆';
+        scrollBtn.title = isAtTop ? 'Scroll to bottom' : 'Scroll to top';
+    }
+
+    function handleScrollClick() {
+        window.scrollTo({
+            top: isAtTop ? document.body.scrollHeight : 0,
+            behavior: 'smooth'
+        });
+    }
+
+    window.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', adjustBodyPadding);
-    toggleFooter();
+    scrollBtn.addEventListener('click', handleScrollClick);
+    
+    // Initial calls
+    handleScroll();
     adjustBodyPadding();
 });
 </script>
