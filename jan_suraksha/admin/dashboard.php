@@ -42,7 +42,7 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
 ?>
 
 <!doctype html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -61,30 +61,59 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
             --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             --glass-bg: rgba(37, 99, 235, 0.1);
             --glass-border: rgba(37, 99, 235, 0.2);
+            /* Dark Theme */
+            --bg-body: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            --bg-topbar: rgba(17, 24, 39, 0.95);
+            --bg-card: linear-gradient(145deg, rgba(31,41,55,0.8), rgba(17,24,39,0.9));
+            --bg-sidebar: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+            --bg-sidebar-header: linear-gradient(135deg, #2563eb, #1d4ed8);
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --border-subtle: rgba(55, 65, 81, 0.5);
+            --sidebar-nav-bg: linear-gradient(135deg, rgba(37,99,235,0.2), rgba(29,78,216,0.3));
+            --chart-text: #9ca3af;
+            --chart-grid: rgba(148,163,184,0.1);
+        }
+
+        [data-theme="light"] {
+            /* Light Theme */
+            --bg-body: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+            --bg-topbar: rgba(255, 255, 255, 0.95);
+            --bg-card: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(248,250,252,0.8));
+            --bg-sidebar: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            --bg-sidebar-header: linear-gradient(135deg, #3b82f6, #2563eb);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-subtle: rgba(148, 163, 184, 0.3);
+            --sidebar-nav-bg: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(37,99,235,0.15));
+            --chart-text: #64748b;
+            --chart-grid: rgba(148,163,184,0.2);
         }
 
         * { font-family: 'Inter', sans-serif; }
         body { 
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            background: var(--bg-body);
             min-height: 100vh;
+            transition: all 0.3s ease;
         }
 
         /* Sidebar */
         .sidebar {
             width: 280px; 
-            background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+            background: var(--bg-sidebar);
             backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(55, 65, 81, 0.5);
-            box-shadow: 5px 0 25px rgba(0,0,0,0.3);
+            border-right: 1px solid var(--border-subtle);
+            box-shadow: 5px 0 25px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
         }
         .sidebar-header { 
-            background: linear-gradient(135deg, #2563eb, #1d4ed8); 
+            background: var(--bg-sidebar-header); 
             color: white;
             padding: 1.5rem 2rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         .sidebar-nav .nav-link {
-            color: #9ca3af; 
+            color: var(--text-primary); 
             padding: 1rem 2rem; 
             margin: 0.25rem 1rem;
             border-radius: 12px;
@@ -92,30 +121,38 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
             font-weight: 500;
         }
         .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active {
-            background: linear-gradient(135deg, rgba(37,99,235,0.2), rgba(29,78,216,0.3));
-            color: white;
+            background: var(--sidebar-nav-bg);
+            color: var(--text-primary);
             transform: translateX(8px);
-            box-shadow: 0 8px 25px rgba(37,99,235,0.3);
+            box-shadow: 0 8px 25px rgba(37,99,235,0.2);
         }
         .sidebar-nav .nav-link i {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            background: var(--primary-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             width: 24px;
             margin-right: 1rem;
         }
+        .sidebar-nav .nav-link.text-danger {
+            color: #ef4444 !important;
+        }
+        .sidebar-nav .nav-link.text-danger:hover {
+            background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.3)) !important;
+            color: #ef4444 !important;
+        }
 
         /* Topbar */
         .topbar { 
-            background: rgba(17, 24, 39, 0.95);
+            background: var(--bg-topbar);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(55, 65, 81, 0.5);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            border-bottom: 1px solid var(--border-subtle);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
         }
 
         /* Metric Cards */
         .metric-card {
-            background: linear-gradient(145deg, rgba(31,41,55,0.8), rgba(17,24,39,0.9));
+            background: var(--bg-card);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(37,99,235,0.3);
             border-radius: 20px;
@@ -124,6 +161,7 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
             transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
             position: relative;
             overflow: hidden;
+            color: var(--text-primary);
         }
         .metric-card::before {
             content: '';
@@ -133,8 +171,8 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
         }
         .metric-card:hover {
             transform: translateY(-12px) scale(1.02);
-            box-shadow: 0 25px 50px rgba(37,99,235,0.4);
-            border-color: rgba(37,99,235,0.6);
+            box-shadow: 0 25px 50px rgba(37,99,235,0.3);
+            border-color: rgba(37,99,235,0.5);
         }
         .metric-card .icon {
             font-size: 3rem;
@@ -143,6 +181,7 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
             -webkit-text-fill-color: transparent;
             margin-bottom: 1rem;
         }
+        .metric-card .text-secondary { color: var(--text-secondary) !important; }
         .metric-badge {
             padding: 0.5rem 1.25rem;
             border-radius: 50px;
@@ -160,14 +199,14 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
             transition: all 0.3s ease;
             backdrop-filter: blur(15px);
         }
-        .quick-action-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+        .quick-action-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
 
         /* Recent Table */
         .recent-table thead th {
-            background: rgba(37,99,235,0.2);
+            background: rgba(37,99,235,0.15);
             border: none;
             font-weight: 600;
-            color: white;
+            color: var(--text-primary);
         }
         .status-badge {
             padding: 0.375rem 0.875rem;
@@ -175,13 +214,60 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
             font-size: 0.75rem;
             font-weight: 600;
             backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
         }
-        .status-pending { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-        .status-progress { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
-        .status-resolved { background: rgba(34,197,94,0.2); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+        .status-pending { background: rgba(239,68,68,0.15); color: #f87171; border-color: rgba(239,68,68,0.3); }
+        .status-progress { background: rgba(16,185,129,0.15); color: #34d399; border-color: rgba(16,185,129,0.3); }
+        .status-resolved { background: rgba(34,197,94,0.15); color: #4ade80; border-color: rgba(34,197,94,0.3); }
 
         /* Charts */
-        .chart-container { background: rgba(31,41,55,0.8); border-radius: 20px; padding: 2rem; backdrop-filter: blur(20px); }
+        .chart-container { 
+            background: var(--bg-card); 
+            border-radius: 20px; 
+            padding: 2rem; 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(37,99,235,0.3);
+            color: var(--text-primary);
+        }
+        .chart-container .text-secondary { color: var(--text-secondary) !important; }
+
+        /* Theme Toggle - Fixed Classic Style */
+        .theme-toggle {
+            border: 2px solid var(--border-subtle) !important;
+            color: var(--text-primary) !important;
+            padding: 0.5rem 0.75rem !important;
+            border-radius: 50px !important;
+            font-size: 1.1rem !important;
+            transition: all 0.3s ease !important;
+            background: rgba(255,255,255,0.1) !important;
+            backdrop-filter: blur(10px) !important;
+        }
+        .theme-toggle:hover {
+            border-color: rgba(37,99,235,0.5) !important;
+            background: rgba(37,99,235,0.1) !important;
+            transform: scale(1.05);
+        }
+        /* Dark mode: show sun icon */
+        [data-theme="dark"] .theme-toggle .sun-icon { 
+            display: inline-block !important; 
+            color: #fbbf24 !important;
+        }
+        [data-theme="dark"] .theme-toggle .moon-icon { 
+            display: none !important; 
+        }
+        /* Light mode: show moon icon */
+        [data-theme="light"] .theme-toggle .sun-icon { 
+            display: none !important; 
+        }
+        [data-theme="light"] .theme-toggle .moon-icon { 
+            display: inline-block !important; 
+            color: #0f172a !important;
+        }
+
+        /* Table responsiveness */
+        .table-dark { color: var(--text-primary); }
+        .table-dark td, .table-dark th { border-color: var(--border-subtle); }
     </style>
 </head>
 <body>
@@ -224,15 +310,19 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
                 <i class="bi bi-list fs-5"></i>
             </button>
             <div class="d-flex align-items-center ms-auto">
+                <button id="theme-toggle" class="btn theme-toggle me-3" aria-label="Toggle light/dark theme" aria-pressed="true" title="Toggle Theme">
+                    <i class="bi bi-sun-fill sun-icon"></i>
+                    <i class="bi bi-moon-fill moon-icon"></i>
+                </button>
                 <span class="badge bg-primary fs-6 me-2">Admin</span>
                 <div class="dropdown ms-3">
-                    <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style="color: var(--text-primary) !important;">
                         <i class="bi bi-person-circle fs-5 me-2"></i>
                         <span class="fw-semibold"><?= $_SESSION['admin_name'] ?? 'Admin' ?></span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="profile.php"><i class="bi bi-person me-2"></i>Profile</a></li>
-                        <li><hr class="dropdown-divider"></li>
+                    <ul class="dropdown-menu dropdown-menu-end" style="background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-primary);">
+                        <li><a class="dropdown-item" href="profile.php" style="color: var(--text-primary);"><i class="bi bi-person me-2"></i>Profile</a></li>
+                        <li><hr class="dropdown-divider" style="border-color: var(--border-subtle);"></li>
                         <li><a class="dropdown-item text-danger" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                     </ul>
                 </div>
@@ -243,11 +333,11 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
             <!-- Header -->
             <div class="d-flex justify-content-between align-items-center mb-5">
                 <div>
-                    <h1 class="display-5 fw-bold mb-2 text-white">Welcome Back, Admin</h1>
-                    <p class="text-secondary mb-0">Here's what's happening with your cases today</p>
+                    <h1 class="display-5 fw-bold mb-2" style="color: var(--text-primary);">Welcome Back, Admin</h1>
+                    <p class="text-secondary mb-0" style="color: var(--text-secondary);">Here's what's happening with your cases today</p>
                 </div>
                 <div class="text-end">
-                    <span class="badge bg-success fs-6">Online</span>
+                    <span class="badge bg-success fs-6" style="background: rgba(16,185,129,0.2) !important; color: #34d399 !important; border: 1px solid rgba(16,185,129,0.3);">Online</span>
                 </div>
             </div>
 
@@ -257,7 +347,7 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
                     <div class="metric-card h-100">
                         <div class="icon"><i class="bi bi-file-earmark-text"></i></div>
                         <div class="text-secondary mb-2">Total Complaints</div>
-                        <h2 class="fw-bold text-white mb-2"><?= number_format($total) ?></h2>
+                        <h2 class="fw-bold mb-2" style="color: var(--text-primary);"><?= number_format($total) ?></h2>
                         <div class="metric-badge bg-primary">+12% vs last week</div>
                     </div>
                 </div>
@@ -265,7 +355,7 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
                     <div class="metric-card h-100">
                         <div class="icon"><i class="bi bi-clock-history"></i></div>
                         <div class="text-secondary mb-2">Pending</div>
-                        <h2 class="fw-bold text-warning"><?= number_format($pending) ?></h2>
+                        <h2 class="fw-bold mb-2" style="color: var(--text-primary);"><?= number_format($pending) ?></h2>
                         <div class="metric-badge status-pending">Needs attention</div>
                     </div>
                 </div>
@@ -273,7 +363,7 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
                     <div class="metric-card h-100">
                         <div class="icon"><i class="bi bi-check-circle-fill"></i></div>
                         <div class="text-secondary mb-2">Resolved</div>
-                        <h2 class="fw-bold text-success"><?= number_format($resolved) ?></h2>
+                        <h2 class="fw-bold mb-2" style="color: var(--text-primary);"><?= number_format($resolved) ?></h2>
                         <div class="metric-badge bg-success">95% success</div>
                     </div>
                 </div>
@@ -281,7 +371,7 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
                     <div class="metric-card h-100">
                         <div class="icon"><i class="bi bi-people-fill"></i></div>
                         <div class="text-secondary mb-2">Total Criminals</div>
-                        <h2 class="fw-bold text-primary"><?= number_format($criminals) ?></h2>
+                        <h2 class="fw-bold mb-2" style="color: var(--text-primary);"><?= number_format($criminals) ?></h2>
                         <div class="metric-badge bg-info">Database synced</div>
                     </div>
                 </div>
@@ -292,23 +382,27 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
                 <div class="col-lg-8">
                     <div class="chart-container h-100">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="mb-0 fw-semibold"><i class="bi bi-bar-chart-line me-2 text-primary"></i>Crime Category Breakdown</h5>
-                            <select class="form-select form-select-sm" style="width: 180px;">
+                            <h5 class="mb-0 fw-semibold" style="color: var(--text-primary);"><i class="bi bi-bar-chart-line me-2" style="color: #2563eb;"></i>Crime Category Breakdown</h5>
+                            <select class="form-select form-select-sm" style="width: 180px; background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-primary);">
                                 <option>Last 30 days</option>
                                 <option>Last 7 days</option>
                                 <option>Last 90 days</option>
                             </select>
                         </div>
-                        <canvas id="categoryChart" height="120"></canvas>
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-4">
                     <div class="chart-container h-100">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="mb-0 fw-semibold"><i class="bi bi-pie-chart-fill me-2 text-success"></i>Status Distribution</h5>
+                            <h5 class="mb-0 fw-semibold" style="color: var(--text-primary);"><i class="bi bi-pie-chart-fill me-2" style="color: #10b981;"></i>Status Distribution</h5>
                         </div>
                         <div class="d-flex align-items-center justify-content-center h-100">
-                            <canvas id="statusChart" width="200" height="200"></canvas>
+                            <div style="position: relative; width: 250px; height: 250px;">
+                                <canvas id="statusChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -318,7 +412,7 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
             <div class="row g-4">
                 <div class="col-lg-4">
                     <div class="card metric-card p-4 h-100">
-                        <h5 class="mb-4 fw-semibold"><i class="bi bi-lightning-charge-fill me-2 text-warning"></i>Quick Actions</h5>
+                        <h5 class="mb-4 fw-semibold" style="color: var(--text-primary);"><i class="bi bi-lightning-charge-fill me-2" style="color: #f59e0b;"></i>Quick Actions</h5>
                         <div class="d-grid gap-3">
                             <a href="add-complaint.php" class="quick-action-btn btn-primary">
                                 <i class="bi bi-plus-circle-fill me-2"></i>New Complaint
@@ -336,11 +430,11 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
                     </div>
                 </div>
                 <div class="col-lg-8">
-                    <div class="card p-4" style="background: rgba(31,41,55,0.8); border-radius: 20px; border: 1px solid rgba(55,65,81,0.5);">
+                    <div class="card p-4 recent-table" style="background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border-subtle);">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="mb-0 fw-semibold"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Complaints</h5>
+                            <h5 class="mb-0 fw-semibold" style="color: var(--text-primary);"><i class="bi bi-clock-history me-2" style="color: #2563eb;"></i>Recent Complaints</h5>
                             <div class="d-flex gap-2">
-                                <select class="form-select form-select-sm" style="width: 120px;">
+                                <select class="form-select form-select-sm" style="width: 120px; background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-primary);">
                                     <option>All</option>
                                     <option>Pending</option>
                                     <option>Resolved</option>
@@ -349,39 +443,45 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
                             </div>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-hover table-dark mb-0">
+                            <table class="table table-hover mb-0">
                                 <thead>
                                     <tr>
-                                        <th class="fw-semibold">Complaint ID</th>
-                                        <th class="fw-semibold">Type</th>
-                                        <th class="fw-semibold">Status</th>
-                                        <th class="fw-semibold">Complainant</th>
-                                        <th class="fw-semibold">Date</th>
+                                        <th class="fw-semibold" style="color: var(--text-primary);">Complaint ID</th>
+                                        <th class="fw-semibold" style="color: var(--text-primary);">Type</th>
+                                        <th class="fw-semibold" style="color: var(--text-primary);">Status</th>
+                                        <th class="fw-semibold" style="color: var(--text-primary);">Complainant</th>
+                                        <th class="fw-semibold" style="color: var(--text-primary);">Date</th>
                                         <th></th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <?php while($complaint = $recent_complaints->fetch_assoc()): ?>
-                                    <tr class="align-middle">
-                                        <td><span class="fw-semibold">#<?= htmlspecialchars($complaint['complaint_code']) ?></span></td>
-                                        <td><?= htmlspecialchars($complaint['crime_type']) ?></td>
-                                        <td><span class="status-badge status-<?= strtolower($complaint['status']) ?>">
-                                            <?= htmlspecialchars($complaint['status']) ?>
-                                        </span></td>
-                                        <td><?= htmlspecialchars($complaint['complainant'] ?? 'Anonymous') ?></td>
-                                        <td><small class="text-secondary"><?= date('M d, H:i', strtotime($complaint['created_at'])) ?></small></td>
-                                        <td>
-                                            <a href="view-complaint.php?id=<?= $complaint['id'] ?>" class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <?php endwhile; ?>
+                                <tbody style="color: var(--text-primary);">
+                                    <?php if($recent_complaints && $recent_complaints->num_rows > 0): ?>
+                                        <?php $recent_complaints->data_seek(0); while($complaint = $recent_complaints->fetch_assoc()): ?>
+                                        <tr class="align-middle">
+                                            <td><span class="fw-semibold">#<?= htmlspecialchars($complaint['complaint_code']) ?></span></td>
+                                            <td><?= htmlspecialchars($complaint['crime_type']) ?></td>
+                                            <td><span class="status-badge status-<?= strtolower(str_replace(' ', '-', $complaint['status'])) ?>">
+                                                <?= htmlspecialchars($complaint['status']) ?>
+                                            </span></td>
+                                            <td><?= htmlspecialchars($complaint['complainant'] ?? 'Anonymous') ?></td>
+                                            <td><small style="color: var(--text-secondary);"><?= date('M d, H:i', strtotime($complaint['created_at'])) ?></small></td>
+                                            <td>
+                                                <a href="view-complaint.php?id=<?= $complaint['id'] ?>" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <?php endwhile; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="6" class="text-center py-4" style="color: var(--text-secondary);">No recent complaints</td>
+                                        </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
                         <div class="text-center mt-3">
-                            <a href="cases.php" class="text-primary fw-semibold">View All Complaints →</a>
+                            <a href="cases.php" class="fw-semibold" style="color: #2563eb;">View All Complaints →</a>
                         </div>
                     </div>
                 </div>
@@ -393,13 +493,13 @@ $recent_complaints = run_query("SELECT c.id, c.complaint_code, c.crime_type, c.s
 <!-- Alert Modal -->
 <div class="modal fade" id="sendAlertModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-dark border-0 shadow-lg" style="border-radius: 20px;">
+        <div class="modal-content" style="background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border-subtle); color: var(--text-primary);">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold"><i class="bi bi-bell-fill text-warning me-2"></i>Send Alert</h5>
+                <h5 class="modal-title fw-bold" style="color: var(--text-primary);"><i class="bi bi-bell-fill text-warning me-2"></i>Send Alert</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Choose alert type:</p>
+                <p style="color: var(--text-primary);">Choose alert type:</p>
                 <div class="d-grid gap-2">
                     <button class="btn btn-warning">Emergency Alert</button>
                     <button class="btn btn-success">Status Update</button>
@@ -416,10 +516,25 @@ document.getElementById('sidebarToggle')?.addEventListener('click', () => {
     document.getElementById('adminSidebar').classList.toggle('active');
 });
 
-// Charts
+// Global chart references for theme updates
+let categoryChart = null;
+let statusChart = null;
+
+// Theme-aware chart colors
+function getChartColors() {
+    return {
+        textColor: getComputedStyle(document.documentElement).getPropertyValue('--chart-text').trim(),
+        gridColor: getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim()
+    };
+}
+
+// Initialize Charts
 document.addEventListener('DOMContentLoaded', () => {
+    const colors = getChartColors();
+    
     // Category Chart
-    new Chart(document.getElementById('categoryChart'), {
+    const ctx1 = document.getElementById('categoryChart').getContext('2d');
+    categoryChart = new Chart(ctx1, {
         type: 'bar',
         data: {
             labels: <?= json_encode($category_labels) ?>,
@@ -432,16 +547,24 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                x: { grid: { display: false }, ticks: { color: '#9ca3af' } },
-                y: { grid: { color: 'rgba(148,163,184,0.1)' }, ticks: { color: '#9ca3af' } }
+                x: { 
+                    grid: { display: false }, 
+                    ticks: { color: colors.textColor } 
+                },
+                y: { 
+                    grid: { color: colors.gridColor }, 
+                    ticks: { color: colors.textColor } 
+                }
             }
         }
     });
 
     // Status Doughnut
-    new Chart(document.getElementById('statusChart'), {
+    const ctx2 = document.getElementById('statusChart').getContext('2d');
+    statusChart = new Chart(ctx2, {
         type: 'doughnut',
         data: {
             labels: ['Pending', 'In Progress', 'Resolved'],
@@ -453,11 +576,56 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             cutout: '75%',
             plugins: { legend: { display: false } }
         }
     });
 });
+
+// Fixed Theme Toggle - NO MORE REFRESH!
+(function() {
+    const html = document.documentElement;
+    const toggle = document.getElementById('theme-toggle');
+    const isDark = localStorage.getItem('admin-theme') !== 'light';
+
+    function updateCharts() {
+        if (categoryChart) {
+            const colors = getChartColors();
+            categoryChart.options.scales.x.ticks.color = colors.textColor;
+            categoryChart.options.scales.y.ticks.color = colors.textColor;
+            categoryChart.options.scales.y.grid.color = colors.gridColor;
+            categoryChart.update('none'); // Fast update without animation
+        }
+        if (statusChart) {
+            statusChart.update('none');
+        }
+    }
+
+    function applyTheme(dark) {
+        html.setAttribute('data-theme', dark ? 'dark' : 'light');
+        toggle.setAttribute('aria-pressed', dark);
+        localStorage.setItem('admin-theme', dark ? 'dark' : 'light');
+        
+        // Update charts instantly without reload
+        updateCharts();
+    }
+
+    // Set initial theme
+    applyTheme(isDark);
+
+    // Toggle theme
+    toggle.addEventListener('click', () => {
+        const currentIsDark = html.getAttribute('data-theme') === 'dark';
+        applyTheme(!currentIsDark);
+    });
+
+    // Listen for theme changes and update charts
+    const observer = new MutationObserver(() => {
+        updateCharts();
+    });
+    observer.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+})();
 </script>
 </body>
 </html>
