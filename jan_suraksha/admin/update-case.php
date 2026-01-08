@@ -45,15 +45,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $existing_mugshot = $_POST['existing_mugshot'] ?? '';
             $new_mugshot = $existing_mugshot;
 
-            if (isset($_FILES['mugshot']) && $_FILES['mugshot']['error'] === UPLOAD_ERR_OK) {
-                $file = $_FILES['mugshot'];
-                if ($file['size'] < 5 * 1024 * 1024 && in_array($file['type'], ['image/jpeg', 'image/png'])) {
-                    $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-                    $new_mugshot = bin2hex(random_bytes(16)) . '.' . $ext;
-                    if (!move_uploaded_file($file['tmp_name'], __DIR__ . '/../uploads/mugshots/' . $new_mugshot)) {
-                        throw new Exception("Failed to move uploaded mugshot file.");
-                    }
-                } else { throw new Exception("Invalid mugshot file. Must be JPG/PNG and under 5MB."); }
+            // Handle mugshot upload with strict MIME + extension checks
+            if (isset($_FILES['mugshot']) && $_FILES['mugshot']['error'] !== UPLOAD_ERR_NO_FILE) {
+                $mugshotFile = $_FILES['mugshot'];
+
+                $allowedMugshotTypes = [
+                    'jpg'  => ['image/jpeg', 'image/pjpeg'],
+                    'jpeg' => ['image/jpeg', 'image/pjpeg'],
+                    'png'  => ['image/png'],
+                ];
+
+                $maxMugshotSize = 5 * 1024 * 1024; // 5MB
+                $uploadError = null;
+                $destDir = __DIR__ . '/../uploads/mugshots';
+
+                $storedName = js_secure_upload($mugshotFile, $allowedMugshotTypes, $destDir, $maxMugshotSize, $uploadError, 'mugshot');
+
+                if ($uploadError !== null) {
+                    throw new Exception($uploadError . ' Mugshots must be JPG or PNG under 5MB.');
+                }
+
+                $new_mugshot = $storedName;
             }
 
             if ($accused_id > 0) {

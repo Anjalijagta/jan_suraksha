@@ -27,31 +27,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($pincode && !preg_match('/^[0-9]{6}$/', $pincode)) {
         $err = 'Pincode must be 6 digits.';
     } else {
-        // Handle file upload
+        // Handle file upload (evidence)
         $uploadedFile = null;
-        if (!empty($_FILES['evidence']) && $_FILES['evidence']['error'] === UPLOAD_ERR_OK) {
-            $u = $_FILES['evidence'];
-            $allowed = ['image/jpeg', 'image/png', 'application/pdf', 'video/mp4'];
 
-            if (!in_array($u['type'], $allowed)) {
-                $err = 'Unsupported file type. Allowed: JPG, PNG, PDF, MP4';
-            } elseif ($u['size'] > 20 * 1024 * 1024) {
-                $err = 'File too large. Maximum 20MB.';
+        if (!empty($_FILES['evidence']) && $_FILES['evidence']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $evidenceFile = $_FILES['evidence'];
+
+            // Strict allow-list: images + selected document/media types
+            $allowedEvidenceTypes = [
+                'jpg'  => ['image/jpeg', 'image/pjpeg'],
+                'jpeg' => ['image/jpeg', 'image/pjpeg'],
+                'png'  => ['image/png'],
+                'pdf'  => ['application/pdf'],
+                'mp4'  => ['video/mp4', 'video/x-m4v'],
+            ];
+
+            $maxEvidenceSize = 20 * 1024 * 1024; // 20MB
+            $uploadError = null;
+            $destDir = __DIR__ . '/uploads';
+
+            $storedName = js_secure_upload($evidenceFile, $allowedEvidenceTypes, $destDir, $maxEvidenceSize, $uploadError, 'evidence');
+
+            if ($uploadError !== null) {
+                $err = $uploadError . ' Allowed types: JPG, JPEG, PNG, PDF, MP4.';
             } else {
-                $ext = pathinfo($u['name'], PATHINFO_EXTENSION);
-                $safe = bin2hex(random_bytes(16)) . '.' . $ext;
-                $destDir = __DIR__ . '/uploads';
-
-                if (!is_dir($destDir)) {
-                    mkdir($destDir, 0755, true);
-                }
-
-                $dest = $destDir . '/' . $safe;
-                if (move_uploaded_file($u['tmp_name'], $dest)) {
-                    $uploadedFile = $safe;
-                } else {
-                    $err = 'Failed to upload file.';
-                }
+                $uploadedFile = $storedName;
             }
         }
 
