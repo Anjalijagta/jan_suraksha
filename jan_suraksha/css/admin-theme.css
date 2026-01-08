@@ -1,0 +1,197 @@
+/* admin-theme.css */
+
+/* 1. Theme tokens */
+:root {
+  --admin-bg: #0f0f23;
+  --admin-bg-surface: #111827;
+  --admin-bg-surface-elevated: #1f2937;
+  --admin-border-subtle: rgba(55, 65, 81, 0.5);
+  --admin-primary: #2563eb;
+  --admin-primary-soft: rgba(37, 99, 235, 0.2);
+  --admin-primary-gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%);
+  --admin-danger: #ef4444;
+  --admin-warning: #f59e0b;
+  --admin-success: #22c55e;
+
+  --admin-radius-lg: 20px;
+  --admin-radius-md: 16px;
+  --admin-radius-sm: 12px;
+
+  --admin-shadow-soft: 0 10px 30px rgba(0,0,0,0.35);
+
+  --admin-font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 2. Global layout + typography */
+body.admin-layout {
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  min-height: 100vh;
+  font-family: var(--admin-font-family);
+}
+
+/* 3. Shell components */
+.admin-shell {
+  display: flex;
+}
+
+.admin-sidebar {
+  width: 280px;
+  background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--admin-border-subtle);
+  box-shadow: 5px 0 25px rgba(0,0,0,0.3);
+}
+
+.admin-sidebar-header {
+  background: var(--admin-primary-gradient);
+  color: #fff;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.admin-sidebar-nav .nav-link {
+  color: #9ca3af;
+  padding: 1rem 2rem;
+  margin: 0.25rem 1rem;
+  border-radius: var(--admin-radius-sm);
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+.admin-sidebar-nav .nav-link:hover,
+.admin-sidebar-nav .nav-link.active {
+  background: linear-gradient(135deg, rgba(37,99,235,0.2), rgba(29,78,216,0.3));
+  color: #fff;
+  transform: translateX(8px);
+  box-shadow: 0 8px 25px rgba(37,99,235,0.3);
+}
+
+.admin-topbar {
+  background: rgba(17, 24, 39, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--admin-border-subtle);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+/* 4. Surface utilities */
+.admin-surface {
+  background: linear-gradient(145deg, rgba(31,41,55,0.9), rgba(17,24,39,0.95));
+  backdrop-filter: blur(20px);
+  border-radius: var(--admin-radius-lg);
+  border: 1px solid rgba(55,65,81,0.5);
+  box-shadow: var(--admin-shadow-soft);
+}
+
+/* 5. Cards */
+.admin-card {
+  @extend .admin-surface; /* or just copy these properties if not using SCSS */
+  padding: 1.75rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+.admin-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto auto 0;
+  height: 4px;
+  background: var(--admin-primary-gradient);
+}
+
+.admin-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(37,99,235,0.4);
+  box-shadow: 0 20px 40px rgba(37,99,235,0.2);
+}
+
+/* 6. Pills / badges */
+.admin-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+}
+
+/* Priority variants */
+.admin-pill-priority-high {
+  background: rgba(239,68,68,0.2);
+  color: #f87171;
+  border: 1px solid rgba(239,68,68,0.4);
+}
+
+.admin-pill-priority-medium {
+  background: rgba(245,158,11,0.2);
+  color: #f59e0b;
+  border: 1px solid rgba(245,158,11,0.4);
+}
+
+.admin-pill-priority-low {
+  background: rgba(16,185,129,0.2);
+  color: #10b981;
+  border: 1px solid rgba(16,185,129,0.4);
+}
+
+/* Status variants */
+.admin-pill-status-pending {
+  background: rgba(239,68,68,0.15);
+  color: #f87171;
+  border: 1px solid rgba(239,68,68,0.3);
+}
+
+.admin-pill-status-in-progress {
+  background: rgba(59,130,246,0.15);
+  color: #3b82f6;
+  border: 1px solid rgba(59,130,246,0.3);
+}
+
+.admin-pill-status-resolved {
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
+  border: 1px solid rgba(34,197,94,0.3);
+}
+
+/* 7. Buttons */
+.admin-btn {
+  border-radius: 12px;
+  padding: 0.5rem 1.25rem;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.admin-btn-primary {
+  background: var(--admin-primary-gradient);
+  color: #fff;
+  border-color: transparent;
+}
+
+.admin-btn-ghost {
+  background: transparent;
+  color: #e5e7eb;
+}
+
+.admin-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+/* 8. Page header + stats */
+.admin-page-header-title {
+  color: #fff;
+}
+
+.admin-page-header-subtitle {
+  color: #9ca3af;
+}
+
+.admin-stats-bar {
+  background: linear-gradient(90deg, rgba(37,99,235,0.15), rgba(59,130,246,0.1));
+  backdrop-filter: blur(20px);
+  border-radius: var(--admin-radius-md);
+  padding: 1.25rem;
+  border: 1px solid rgba(37,99,235,0.2);
+}

@@ -111,7 +111,12 @@ $case = $stmt->get_result()->fetch_assoc();
 
 if (!$case) { die("Error: Case not found."); }
 
-$diary_entries = $mysqli->query("SELECT * FROM case_diary WHERE complaint_id = $complaint_id ORDER BY created_at DESC");
+// Fetch diary entries using prepared statement to prevent SQL injection
+$stmt = $mysqli->prepare("SELECT * FROM case_diary WHERE complaint_id = ? ORDER BY created_at DESC");
+$complaint_id_int = (int)$complaint_id;
+$stmt->bind_param('i', $complaint_id_int);
+$stmt->execute();
+$diary_entries = $stmt->get_result();
 
 $current_page = 'cases.php'; // CORRECTED
 ?>
