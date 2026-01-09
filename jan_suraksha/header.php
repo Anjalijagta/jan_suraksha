@@ -994,30 +994,13 @@ require_once __DIR__ . '/config.php';
             color: var(--color-text) !important;
         }
 
-        /* Navbar light theme blur fix */
-        [data-theme="light"] .navbar {
-            background: rgba(255, 255, 255, 0.95) !important;
-        }
-
-        /* Remove extra separators/gaps so hero/banner sits flush with nav */
-        header.border-bottom {
-            border-bottom: 0 !important;
-        }
-
-        .navbar-main {
-            border-bottom: 0 !important;
-            box-shadow: none !important;
-            margin-bottom: 0 !important;
-        }
-
-        .top-bar {
-            margin-bottom: 0 !important;
-        }
-
-        .hero-section {
-            margin-top: 0 !important;
-            padding-top: 12px; /* small padding to avoid touching exactly if desired */
-        }
+        /* NOTE:
+         * Duplicate navbar/layout rules (background, borders, top-bar spacing,
+         * and hero-section offsets) that previously appeared here have been
+         * removed because the same selectors are already defined earlier
+         * in this stylesheet. Keeping a single canonical definition reduces
+         * CSS duplication and avoids conflicting overrides.
+         */
     </style>
 </head>
 <body data-theme="light">
