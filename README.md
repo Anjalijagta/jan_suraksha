@@ -17,6 +17,7 @@
 - [📂 Project Architecture](#-project-architecture)
 - [✨ Features](#-features)
 - [📸 Screenshots](#-screenshots)
+- ![Gallery Page Output](screenshots/gallery-output.png)
 - [🛠️ Getting Started (Installation)](#️-getting-started-installation)
   - [Prerequisites](#prerequisites)
   - [Step-by-Step Installation](#step-by-step-installation)
