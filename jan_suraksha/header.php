@@ -592,7 +592,7 @@ require_once __DIR__ . '/config.php';
             justify-content: center;
         }
 
-*** End Patch        /* NAVBAR base (for blur effect on scroll if needed) */
+        /* NAVBAR base (for blur effect on scroll if needed) */
         .navbar {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(12px);
