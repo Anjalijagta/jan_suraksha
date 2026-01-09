@@ -102,14 +102,9 @@ if (!function_exists('js_secure_upload')) {
         // Use actual file size on disk, not only client-reported size
         $clientSize = isset($file['size']) ? (int)$file['size'] : 0;
         $actualSize = @filesize($file['tmp_name']);
-        if ($actualSize === false) {
-            $errorMessage = 'Unable to determine uploaded file size.';
-            error_log("Rejected {$context} upload: could not determine filesize() for tmp_name (client reported {$clientSize}).");
-            return null;
-        }
-        if ($actualSize <= 0 || $actualSize > $maxSizeBytes) {
+        if ($actualSize === false || $actualSize < 0 || $actualSize > $maxSizeBytes) {
             $errorMessage = 'File size is not allowed.';
-            error_log("Rejected {$context} upload: actual size {$actualSize} bytes outside allowed range (max {$maxSizeBytes}, client reported {$clientSize}).");
+            error_log("Rejected {$context} upload: actual size {$actualSize} bytes (client reported {$clientSize}) outside allowed range (max {$maxSizeBytes}).");
             return null;
         }
 
@@ -118,6 +113,12 @@ if (!function_exists('js_secure_upload')) {
             $errorMessage = 'Unable to validate file type.';
             error_log("Rejected {$context} upload: could not detect MIME type.");
             return null;
+        }
+
+        // Normalise MIME by stripping any parameters like "; charset=utf-8"
+        $semiPos = strpos($mime, ';');
+        if ($semiPos !== false) {
+            $mime = trim(substr($mime, 0, $semiPos));
         }
 
         $ext = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));

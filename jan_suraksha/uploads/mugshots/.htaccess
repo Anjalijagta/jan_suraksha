@@ -1,7 +1,7 @@
 # Security hardening for mugshot uploads
 # Only image files should live here; explicitly block script execution.
 
-<FilesMatch "\.(php|phtml|php3|php4|php5|php7|php8|phar|pl|py|cgi|sh|bash|exe)$">
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|php8|phar|phps|pl|py|cgi|sh|bash|exe)$">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>
@@ -14,4 +14,4 @@
     php_flag engine off
 </IfModule>
 
-AddType text/plain .php .phtml .php3 .php4 .php5 .php7 .php8 .phar
+AddType text/plain .php .phtml .php3 .php4 .php5 .php7 .php8 .phar .phps

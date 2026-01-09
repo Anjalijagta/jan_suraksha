@@ -70,6 +70,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 $new_mugshot = $storedName;
+
+                if (!empty($existing_mugshot) && $existing_mugshot !== $new_mugshot) {
+                    $oldMugshotPath = $destDir . DIRECTORY_SEPARATOR . basename($existing_mugshot);
+                    if (is_file($oldMugshotPath)) {
+                        @unlink($oldMugshotPath);
+                    }
+                }
             }
 
             if ($accused_id > 0) {
