@@ -1082,9 +1082,14 @@ require_once __DIR__ . '/config.php';
               <i class="bi bi-info-circle-fill me-1"></i> About Us
             </a>
           </li>
-          <li class="nav-item">
+<li class="nav-item">
             <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'blog.php' ? 'active' : ''; ?>" href="blog.php">
               <i class="bi bi-journal-text me-1"></i> Blog
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'help.php' ? 'active' : ''; ?>" href="help.php">
+              <i class="bi bi-chat-dots-fill me-1"></i> Help
             </a>
           </li>
           
