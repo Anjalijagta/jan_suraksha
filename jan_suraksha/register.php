@@ -249,7 +249,7 @@ body {
 
             <div class="mb-3">
               <label class="form-label">Mobile Number</label>
-              <input class="form-control" name="mobile" type="tel" autocomplete="tel" placeholder="10 digit mobile number" required>
+              <input class="form-control" name="mobile" type="tel" autocomplete="tel" maxlength="10" placeholder="10 digit mobile number" required>
               <div class="invalid-feedback">Enter a valid 10 digit mobile number.</div>
             </div>
 
