@@ -35,6 +35,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <style>
+
     body {
       background: linear-gradient(135deg, #1e293b 0%, #020617 100%);
       min-height: 100vh;
@@ -52,12 +53,14 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     }
 
     .auth-card {
-      background: #ffffff;
+      background: #ffff;
       border-radius: 20px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
       overflow: hidden;
       animation: slideUp 0.5s ease-out;
-    }
+    }  
+
+
 
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(30px); }
@@ -65,13 +68,17 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     }
 
     .auth-header {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      color: white;
-      padding: 2.25rem 2rem;
-      text-align: center;
-    }
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: white;
+  padding: 2.75rem 2rem 2.25rem;
+  text-align: center;
+  margin: 0;
+  border-radius: 19px 19px 0 0;
+}
+
 
     .auth-header h2 {
+      margin-top:0;
       margin: 0;
       font-weight: 700;
       font-size: 1.7rem;
@@ -137,6 +144,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     .alert {
       border-radius: 10px;
       border: none;
+      margin-bottom: 1.25rem;
     }
 
     .input-group-text {
