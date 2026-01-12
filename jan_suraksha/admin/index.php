@@ -153,13 +153,50 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
       color: #111827;
     }
 
+    .back-home {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .back-home:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      transform: translateX(-2px);
+    }
+
+    .back-home i {
+      font-size: 1.1rem;
+    }
+
     @media (max-width: 576px) {
       .auth-header { padding: 2rem 1.5rem; }
       .auth-body   { padding: 2rem 1.5rem; }
+      .back-home {
+        top: 10px;
+        left: 10px;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
 <body>
+<a href="../index.php" class="back-home">
+  <i class="bi bi-arrow-left"></i> Back to Home
+</a>
 <div class="admin-container">
   <div class="auth-card">
     <div class="auth-header">
