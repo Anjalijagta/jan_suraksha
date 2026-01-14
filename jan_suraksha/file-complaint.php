@@ -305,43 +305,6 @@ document.addEventListener('DOMContentLoaded', function() {
             fileNameDisplay.textContent = '';
         }
     });
-
-    // Add skeleton loading for complaint form
-    const complaintCard = document.querySelector('.card');
-    if (complaintCard && window.showSkeletonLoader) {
-        const cardContent = complaintCard.innerHTML;
-        window.showSkeletonLoader(complaintCard, 'card');
-        
-        setTimeout(() => {
-            if (window.hideSkeletonLoader) {
-                complaintCard.innerHTML = cardContent;
-                window.hideSkeletonLoader(complaintCard);
-                
-                // Re-attach event listeners after skeleton is hidden
-                const newUploadArea = document.getElementById('upload-area');
-                const newFileInput = document.getElementById('evidence-file-input');
-                const newBrowseBtn = document.getElementById('browse-btn');
-                const newFileNameDisplay = document.getElementById('file-name-display');
-                
-                if (newUploadArea && newFileInput) {
-                    newUploadArea.addEventListener('click', () => newFileInput.click());
-                    if (newBrowseBtn) {
-                        newBrowseBtn.addEventListener('click', (e) => {
-                            e.stopPropagation(); 
-                            newFileInput.click();
-                        });
-                    }
-                    newFileInput.addEventListener('change', () => {
-                        if (newFileInput.files.length > 0 && newFileNameDisplay) {
-                            newFileNameDisplay.textContent = 'Selected: ' + newFileInput.files[0].name;
-                        } else if (newFileNameDisplay) {
-                            newFileNameDisplay.textContent = '';
-                        }
-                    });
-                }
-            }
-        }, 700);
-    }
 });
 </script>
 
