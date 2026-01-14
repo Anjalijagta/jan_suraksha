@@ -592,8 +592,12 @@ document.addEventListener('DOMContentLoaded', function() {
     initFormLoadingHandlers();
     initPageTransitions();
     
-    // Hide loading overlay if page loaded with it
-    setTimeout(() => LoadingOverlay.hide(), 100);
+    // Hide loading overlay once the full page has finished loading
+    window.addEventListener('load', function () {
+        if (window.LoadingOverlay && typeof window.LoadingOverlay.hide === 'function') {
+            window.LoadingOverlay.hide();
+        }
+    });
 });
 
 // Export functions for use in other scripts
