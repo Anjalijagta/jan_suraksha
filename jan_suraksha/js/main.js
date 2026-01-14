@@ -498,6 +498,8 @@ function showSkeletonLoader(container, type = 'card') {
     if (!container) return;
     
     container.classList.add('skeleton-container');
+    container.setAttribute('aria-label', 'Loading content');
+    container.setAttribute('aria-busy', 'true');
     
     if (type === 'card') {
         container.innerHTML = `
