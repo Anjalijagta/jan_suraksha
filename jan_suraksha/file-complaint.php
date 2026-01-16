@@ -39,8 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     } else {
         // Regular complaint - name, mobile, and crime type required
         if (!$name || !preg_match('/^[0-9]{10}$/', $mobile) || !$crime) {
-            $err = 'Fill required fields: name, 10-digit mobile, crime type.';
-        } elseif ($pincode && !preg_match('/^[0-9]{6}$/', $pincode)) {
+    }
+
+    // Handle file upload only if there are no validation errors
+    if ($err === '') {
             $err = 'Pincode must be 6 digits.';
         }
     } else {
