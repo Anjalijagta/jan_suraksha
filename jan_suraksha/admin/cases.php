@@ -7,7 +7,8 @@ if (empty($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
 // Handle filters/search
 $q          = trim($_GET['q'] ?? '');
 $crime_type = trim($_GET['crime_type'] ?? '');
-$status     = trim($_GET['status'] ?? '');
+$status = trim($_GET['status'] ?? '');
+$anonymous_filter = trim($_GET['anonymous_filter'] ?? '');
 
 $where  = [];
 $params = [];
@@ -15,11 +16,15 @@ $types  = '';
 $sql    = 'SELECT c.id, c.complaint_code, c.complainant_name, c.crime_type, c.status, c.created_at
            FROM complaints c';
 
-if ($q) {
-    $where[]  = '(c.complaint_code LIKE ? OR c.complainant_name LIKE ?)';
-    $params[] = "%$q%";
-    $params[] = "%$q%";
-    $types   .= 'ss';
+// This query correctly selects the complaint ID as 'id' and includes anonymous fields
+$sql = 'SELECT c.id, c.complaint_code, c.complainant_name, c.crime_type, c.status, c.is_anonymous, c.anonymous_tracking_id FROM complaints c';
+
+if($q){ 
+    $where[] = '(c.complaint_code LIKE ? OR c.complainant_name LIKE ? OR c.anonymous_tracking_id LIKE ?)'; 
+    $params[] = "%$q%"; 
+    $params[] = "%$q%"; 
+    $params[] = "%$q%"; 
+    $types .= 'sss'; 
 }
 if ($crime_type) {
     $where[]  = 'c.crime_type = ?';
@@ -30,6 +35,12 @@ if ($status) {
     $where[]  = 'c.status = ?';
     $params[] = $status;
     $types   .= 's';
+}
+if($anonymous_filter === 'anonymous'){ 
+    $where[] = 'c.is_anonymous = 1'; 
+}
+if($anonymous_filter === 'regular'){ 
+    $where[] = 'c.is_anonymous = 0'; 
 }
 
 if ($where) {
@@ -412,19 +423,59 @@ $active_filters = count(array_filter([$q, $crime_type, $status]));
                             <option>Priority (High)</option>
                             <option>Status</option>
                         </select>
+                        <select class="form-select" name="anonymous_filter">
+                            <option value="">All Complaints</option>
+                            <option <?= $anonymous_filter == 'anonymous' ? 'selected' : '' ?> value="anonymous">Anonymous Only</option>
+                            <option <?= $anonymous_filter == 'regular' ? 'selected' : '' ?> value="regular">Regular Only</option>
+                        </select>
+                        <button class="btn btn-primary" type="submit">Filter</button>
                     </div>
                 </form>
             </div>
 
-            <!-- Complaints List -->
-            <div class="row g-4">
-                <?php if ($res->num_rows === 0): ?>
-                    <div class="col-12">
-                        <div class="text-center py-5 admin-surface">
-                            <i class="bi bi-search display-4 mb-3" style="color: var(--text-muted);"></i>
-                            <h4 style="color: var(--text-primary);">No complaints found</h4>
-                            <p class="mb-4" style="color: var(--text-secondary);">Try adjusting your search filters</p>
-                            <a href="cases.php" class="btn admin-btn admin-btn-primary px-4">Clear Filters</a>
+            <div>
+                <?php while($r = $res->fetch_assoc()): ?>
+                    <div class="complaint-card">
+                        <div>
+                            <div class="d-flex align-items-center mb-2">
+                                <?php if($r['is_anonymous'] == 1): ?>
+                                    <span class="badge bg-warning text-dark me-2">
+                                        <i class="bi bi-shield-lock"></i> Anonymous
+                                    </span>
+                                <?php endif; ?>
+                                <h5 class="mb-0">
+                                    <?php 
+                                    if($r['is_anonymous'] == 1 && !empty($r['anonymous_tracking_id'])) {
+                                        echo 'ID: ' . e($r['anonymous_tracking_id']);
+                                    } else {
+                                        echo 'FIR/Complaint ID: ' . e($r['complaint_code']);
+                                    }
+                                    ?>
+                                </h5>
+                            </div>
+                            <p class="mb-1 text-secondary">
+                                Crime Type: <?= e($r['crime_type']) ?> <br>
+                                Complainant: 
+                                <?php 
+                                if($r['is_anonymous'] == 1) {
+                                    echo '<span class="text-muted fst-italic"><i class="bi bi-lock-fill"></i> Protected (Anonymous)</span>';
+                                } else {
+                                    echo e($r['complainant_name']);
+                                }
+                                ?>
+                            </p>
+                            <?php
+                                $status_class = 'text-secondary'; // Default
+                                $status_key = str_replace(' ', '-', strtolower($r['status']));
+                                if ($status_key === 'resolved' || $status_key === 'closed') $status_class = 'status-resolved';
+                                else if ($status_key === 'pending') $status_class = 'status-pending';
+                                else if ($status_key === 'in-progress') $status_class = 'status-in-progress';
+                            ?>
+                            <strong class="<?= $status_class ?>">Status: <?= e($r['status']) ?></strong>
+                        </div>
+                        <div>
+                            <!-- THE CRITICAL FIX IS HERE -->
+                            <a href="update-case.php?id=<?= (int)$r['id'] ?>" class="btn btn-light btn-sm">Update Case</a>
                         </div>
                     </div>
                 <?php else: ?>
