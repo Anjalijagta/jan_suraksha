@@ -107,17 +107,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Ensure required fields for anonymous complaints are filled
                 const crimeType = document.getElementById('crime_type');
                 const description = document.getElementById('description');
+
+                // Clear any previous custom validation messages
+                if (crimeType) {
+                    crimeType.setCustomValidity('');
+                }
+                if (description) {
+                    description.setCustomValidity('');
+                }
                 
                 if (!crimeType || !crimeType.value) {
                     e.preventDefault();
-                    alert('Please select a crime type');
-                    return false;
+                    if (crimeType) {
+                        crimeType.setCustomValidity('Please select a crime type');
+                        crimeType.reportValidity();
+                        crimeType.focus();
+                    }
+                    return;
                 }
                 
                 if (!description || !description.value.trim()) {
                     e.preventDefault();
-                    alert('Please provide a detailed description');
-                    return false;
+                    if (description) {
+                        description.setCustomValidity('Please provide a detailed description');
+                        description.reportValidity();
+                        description.focus();
+                    }
+                    return;
                 }
             }
         });
