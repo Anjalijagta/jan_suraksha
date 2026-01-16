@@ -9,19 +9,21 @@ if(empty($_SESSION['admin_id'])){ header('Location: index.php'); exit; }
 $q = trim($_GET['q'] ?? '');
 $crime_type = trim($_GET['crime_type'] ?? '');
 $status = trim($_GET['status'] ?? '');
+$anonymous_filter = trim($_GET['anonymous_filter'] ?? '');
 
 $where = [];
 $types = '';
 $params = [];
 
-// This query correctly selects the complaint ID as 'id'
-$sql = 'SELECT c.id, c.complaint_code, c.complainant_name, c.crime_type, c.status FROM complaints c';
+// This query correctly selects the complaint ID as 'id' and includes anonymous fields
+$sql = 'SELECT c.id, c.complaint_code, c.complainant_name, c.crime_type, c.status, c.is_anonymous, c.anonymous_tracking_id FROM complaints c';
 
 if($q){ 
-    $where[] = '(c.complaint_code LIKE ? OR c.complainant_name LIKE ?)'; 
+    $where[] = '(c.complaint_code LIKE ? OR c.complainant_name LIKE ? OR c.anonymous_tracking_id LIKE ?)'; 
     $params[] = "%$q%"; 
     $params[] = "%$q%"; 
-    $types .= 'ss'; 
+    $params[] = "%$q%"; 
+    $types .= 'sss'; 
 }
 if($crime_type){ 
     $where[] = 'c.crime_type = ?'; 
@@ -32,6 +34,12 @@ if($status){
     $where[] = 'c.status = ?'; 
     $params[] = $status; 
     $types .= 's'; 
+}
+if($anonymous_filter === 'anonymous'){ 
+    $where[] = 'c.is_anonymous = 1'; 
+}
+if($anonymous_filter === 'regular'){ 
+    $where[] = 'c.is_anonymous = 0'; 
 }
 
 if($where) {
@@ -171,6 +179,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             <option <?= $status == 'Resolved' ? 'selected' : '' ?>>Resolved</option>
                              <option <?= $status == 'Closed' ? 'selected' : '' ?>>Closed</option>
                         </select>
+                        <select class="form-select" name="anonymous_filter">
+                            <option value="">All Complaints</option>
+                            <option <?= $anonymous_filter == 'anonymous' ? 'selected' : '' ?> value="anonymous">Anonymous Only</option>
+                            <option <?= $anonymous_filter == 'regular' ? 'selected' : '' ?> value="regular">Regular Only</option>
+                        </select>
                         <button class="btn btn-primary" type="submit">Filter</button>
                     </div>
                 </form>
@@ -180,10 +193,32 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <?php while($r = $res->fetch_assoc()): ?>
                     <div class="complaint-card">
                         <div>
-                            <h5 class="mb-1">FIR/Complaint ID: <?= e($r['complaint_code']) ?></h5>
+                            <div class="d-flex align-items-center mb-2">
+                                <?php if($r['is_anonymous'] == 1): ?>
+                                    <span class="badge bg-warning text-dark me-2">
+                                        <i class="bi bi-shield-lock"></i> Anonymous
+                                    </span>
+                                <?php endif; ?>
+                                <h5 class="mb-0">
+                                    <?php 
+                                    if($r['is_anonymous'] == 1 && !empty($r['anonymous_tracking_id'])) {
+                                        echo 'ID: ' . e($r['anonymous_tracking_id']);
+                                    } else {
+                                        echo 'FIR/Complaint ID: ' . e($r['complaint_code']);
+                                    }
+                                    ?>
+                                </h5>
+                            </div>
                             <p class="mb-1 text-secondary">
                                 Crime Type: <?= e($r['crime_type']) ?> <br>
-                                Complainant: <?= e($r['complainant_name']) ?>
+                                Complainant: 
+                                <?php 
+                                if($r['is_anonymous'] == 1) {
+                                    echo '<span class="text-muted fst-italic"><i class="bi bi-lock-fill"></i> Protected (Anonymous)</span>';
+                                } else {
+                                    echo e($r['complainant_name']);
+                                }
+                                ?>
                             </p>
                             <?php
                                 $status_class = 'text-secondary'; // Default

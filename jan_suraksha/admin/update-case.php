@@ -99,6 +99,9 @@ $case = $stmt->get_result()->fetch_assoc();
 
 if (!$case) { die("Error: Case not found."); }
 
+// Set display code for anonymous or regular complaint
+$case['accused_id'] = $case['criminal_id'] ?? 0;
+
 $diary_entries = $mysqli->query("SELECT * FROM case_diary WHERE complaint_id = $complaint_id ORDER BY created_at DESC");
 
 $current_page = 'cases.php'; // CORRECTED
@@ -193,11 +196,38 @@ $current_page = 'cases.php'; // CORRECTED
                     <!-- Left Column -->
                     <div class="col-lg-7">
                         <div class="card p-3 mb-4">
-                            <h5 class="mb-3">Case Information</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">Case Information</h5>
+                                <?php if($case['is_anonymous'] == 1): ?>
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-shield-lock"></i> Anonymous
+                                    </span>
+                                <?php endif; ?>
+                            </div>
                             <div class="info-grid">
-                                <div class="info-label">FIR No:</div><div><?= e($case['complaint_code']) ?></div>
+                                <div class="info-label">
+                                    <?= $case['is_anonymous'] == 1 ? 'Tracking ID:' : 'FIR No:' ?>
+                                </div>
+                                <div>
+                                    <?php 
+                                    if($case['is_anonymous'] == 1 && !empty($case['anonymous_tracking_id'])) {
+                                        echo e($case['anonymous_tracking_id']);
+                                    } else {
+                                        echo e($case['complaint_code']);
+                                    }
+                                    ?>
+                                </div>
                                 <div class="info-label">Date of Incident:</div><div><?= date('Y-m-d', strtotime($case['date_filed'])) ?></div>
-                                <div class="info-label">Complainant:</div><div><?= e($case['complainant_name']) ?></div>
+                                <div class="info-label">Complainant:</div>
+                                <div>
+                                    <?php 
+                                    if($case['is_anonymous'] == 1) {
+                                        echo '<span class="text-muted fst-italic"><i class="bi bi-lock-fill"></i> Protected (Anonymous)</span>';
+                                    } else {
+                                        echo e($case['complainant_name']);
+                                    }
+                                    ?>
+                                </div>
                             </div>
                         </div>
 
