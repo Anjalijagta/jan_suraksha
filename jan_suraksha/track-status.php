@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $err = 'Please enter a Complaint ID or Anonymous Tracking ID.';
     } else {
         // Check if this is an anonymous tracking ID (format: ANON-YYYY-XXXXXX)
-        if (preg_match('/^ANON-\d{4}-[A-F0-9]{6}$/i', $code)) {
+        if (preg_match('/^ANON-\d{4}-[A-F0-9]{6}$/', $code)) {
             // Query by anonymous tracking ID
             $stmt = $mysqli->prepare('SELECT complaint_code, crime_type, status, updated_at, is_anonymous, complainant_name, mobile, location, description FROM complaints WHERE anonymous_tracking_id = ? AND is_anonymous = 1');
             $stmt->bind_param('s', $code);
