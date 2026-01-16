@@ -6,6 +6,12 @@ $tracking_id = isset($_GET['tracking_id']) ? $_GET['tracking_id'] : '';
 if ($tracking_id && !preg_match('/^ANON-\d{4}-[A-F0-9]{6}$/', $tracking_id)) {
     $tracking_id = '';
 }
+
+// If tracking ID is missing or invalid after validation, redirect user
+if (empty($tracking_id)) {
+    header('Location: file-complaint.php');
+    exit;
+}
 ?>
 <?php include 'header.php'; ?>
 
