@@ -3,18 +3,41 @@ require_once __DIR__ . '/config.php';
 
 $status = null;
 $err = '';
+$isAnonymous = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $code = trim($_POST['code'] ?? '');
 
     if (!$code) {
-        $err = 'Please enter a Complaint ID.';
+        $err = 'Please enter a Complaint ID or Anonymous Tracking ID.';
     } else {
-        $stmt = $mysqli->prepare('SELECT complaint_code, crime_type, status, updated_at FROM complaints WHERE complaint_code = ?');
-        $stmt->bind_param('s', $code);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        $status = $res->fetch_assoc();
+        // Check if this is an anonymous tracking ID (format: ANON-YYYY-XXXXXX)
+        if (preg_match('/^ANON-\d{4}-[A-F0-9]{6}$/i', $code)) {
+            // Query by anonymous tracking ID
+            $stmt = $mysqli->prepare('SELECT complaint_code, crime_type, status, updated_at, is_anonymous, complainant_name, mobile, location, description FROM complaints WHERE anonymous_tracking_id = ? AND is_anonymous = 1');
+            $stmt->bind_param('s', $code);
+            $stmt->execute();
+            $res = $stmt->get_result();
+            $status = $res->fetch_assoc();
+            
+            if ($status) {
+                $isAnonymous = true;
+                // Replace complaint_code display with anonymous tracking ID for display
+                $status['display_code'] = $code;
+            }
+        } else {
+            // Query by regular complaint code
+            $stmt = $mysqli->prepare('SELECT complaint_code, crime_type, status, updated_at, is_anonymous, complainant_name, mobile, location, description FROM complaints WHERE complaint_code = ?');
+            $stmt->bind_param('s', $code);
+            $stmt->execute();
+            $res = $stmt->get_result();
+            $status = $res->fetch_assoc();
+            
+            if ($status) {
+                $status['display_code'] = $status['complaint_code'];
+                $isAnonymous = ($status['is_anonymous'] == 1);
+            }
+        }
 
         if (!$status) {
             $err = 'No record found for this Complaint ID.';
@@ -139,10 +162,10 @@ body {
                 <form method="post" class="mb-0">
                     <div class="mb-4">
                         <label for="code" class="form-label h5 mb-3">
-                            <i class="bi bi-card-text me-2 text-primary"></i>Enter Complaint ID
+                            <i class="bi bi-card-text me-2 text-primary"></i>Enter Complaint ID or Anonymous Tracking ID
                         </label>
                         <input type="text" class="form-control status-form-input fs-5 py-3" 
-                               id="code" name="code" placeholder="e.g., JS-2025-12345" required 
+                               id="code" name="code" placeholder="e.g., IN/2026/12345 or ANON-2026-ABC123" required 
                                value="<?= e($_POST['code'] ?? '') ?>">
                     </div>
                     <?php if($err): ?>
@@ -161,12 +184,25 @@ body {
             <?php if($status): ?>
                 <!-- Complaint Hero ID -->
                 <div class="text-center mb-5 p-4 bg-light rounded-4">
-                    <h2 class="mb-2 text-muted">Your Complaint</h2>
-                    <div class="complaint-id-hero mb-2"><?= e($status['complaint_code']) ?></div>
+                    <?php if($isAnonymous): ?>
+                        <div class="mb-3">
+                            <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                                <i class="bi bi-shield-lock me-2"></i>🔒 Anonymous Complaint
+                            </span>
+                        </div>
+                    <?php endif; ?>
+                    <h2 class="mb-2 text-muted"><?= $isAnonymous ? 'Anonymous Tracking ID' : 'Your Complaint' ?></h2>
+                    <div class="complaint-id-hero mb-2"><?= e($status['display_code']) ?></div>
                     <div class="h6 text-muted mb-0">
                         <i class="bi bi-<?= $status['crime_type'] === 'Theft' ? 'bag-check' : 'shield-check' ?> me-2"></i>
                         <?= e($status['crime_type']) ?>
                     </div>
+                    <?php if($isAnonymous): ?>
+                        <div class="mt-3 text-muted small">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Personal information is protected for anonymous complaints
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Status Progress Tracker -->
