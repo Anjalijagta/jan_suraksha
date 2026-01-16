@@ -4,36 +4,45 @@ require_once __DIR__ . '/config.php';
 $err = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name'] ?? '');
-    $mobile = trim($_POST['mobile'] ?? '');
-    $mobile = preg_replace('/\D+/', '', $mobile); // Keep only digits
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirm = $_POST['confirm'] ?? '';
-
-    // Validation
-    if (!$name || !preg_match('/^[0-9]{10}$/', $mobile) || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) < 6 || $password !== $confirm) {
-        $err = 'Please fill form correctly: 10-digit mobile, valid email, and matching passwords (min 6 chars).';
+    // CSRF Protection
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        $err = 'Invalid security token. Please try again.';
     } else {
-        // Check for duplicates
-        $stmt = $mysqli->prepare('SELECT id FROM users WHERE email = ? OR mobile = ?');
-        $stmt->bind_param('ss', $email, $mobile);
-        $stmt->execute();
-        $stmt->store_result();
+        $name = trim($_POST['name'] ?? '');
+        $mobile = trim($_POST['mobile'] ?? '');
+        $mobile = preg_replace('/\D+/', '', $mobile); // Keep only digits
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $confirm = $_POST['confirm'] ?? '';
 
-        if ($stmt->num_rows > 0) {
-            $err = 'Email or mobile already registered.';
+        // Validation
+        if (!$name || !preg_match('/^[0-9]{10}$/', $mobile) || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) < 6 || $password !== $confirm) {
+            $err = 'Please fill form correctly: 10-digit mobile, valid email, and matching passwords (min 6 chars).';
         } else {
-            // Insert new user
-            $hash = password_hash($password, PASSWORD_DEFAULT);
-            $ins = $mysqli->prepare('INSERT INTO users (name, mobile, email, password_hash, created_at) VALUES (?, ?, ?, ?, NOW())');
-            $ins->bind_param('ssss', $name, $mobile, $email, $hash);
+            // Check for duplicates
+            $stmt = $mysqli->prepare('SELECT id FROM users WHERE email = ? OR mobile = ?');
+            $stmt->bind_param('ss', $email, $mobile);
+            $stmt->execute();
+            $stmt->store_result();
 
-            if ($ins->execute()) {
-                header('Location: register-success.php');
-                exit;
+            if ($stmt->num_rows > 0) {
+                $err = 'Email or mobile already registered.';
             } else {
-                $err = 'Error creating account. Please try again.';
+                // Insert new user
+                $hash = password_hash($password, PASSWORD_DEFAULT);
+                $ins = $mysqli->prepare('INSERT INTO users (name, mobile, email, password_hash, created_at) VALUES (?, ?, ?, ?, NOW())');
+                $ins->bind_param('ssss', $name, $mobile, $email, $hash);
+
+                if ($ins->execute()) {
+                    // Session Fixation Protection - Regenerate session ID
+                    session_regenerate_id(true);
+                    // Regenerate CSRF token after successful registration
+                    unset($_SESSION['csrf_token']);
+                    header('Location: register-success.php');
+                    exit;
+                } else {
+                    $err = 'Error creating account. Please try again.';
+                }
             }
         }
     }
@@ -231,6 +240,7 @@ body {
         <div class="auth-body">
           <?php if($err): ?><div class="alert alert-danger"><?=e($err)?></div><?php endif; ?>
           <form method="post" id="registerForm" novalidate>
+            <?php echo csrf_token_field(); ?>
             <div class="mb-3">
               <label class="form-label">Full Name</label>
               <input class="form-control" name="name" type="text" autocomplete="name" placeholder="Enter your full name" required>
@@ -239,7 +249,7 @@ body {
 
             <div class="mb-3">
               <label class="form-label">Mobile Number</label>
-              <input class="form-control" name="mobile" type="tel" autocomplete="tel" placeholder="10 digit mobile number" required>
+              <input class="form-control" name="mobile" type="tel" autocomplete="tel" maxlength="10" placeholder="10 digit mobile number" required>
               <div class="invalid-feedback">Enter a valid 10 digit mobile number.</div>
             </div>
 

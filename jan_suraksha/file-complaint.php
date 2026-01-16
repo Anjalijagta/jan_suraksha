@@ -3,12 +3,16 @@ require_once __DIR__ . '/config.php';
 
 $err = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $user_id = $_SESSION['user_id'] ?? null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') 
+    // CSRF Protection
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        $err = 'Invalid security token. Please refresh the page and try again.';
+    } else {
+        $user_id = $_SESSION['user_id'] ?? null;
 
-    if (empty($user_id)) {
-        $err = 'Please login before filing a complaint.';
-    }
+        if (empty($user_id)) {
+            $err = 'Please login before filing a complaint.';
+        }
 
     // Check if this is an anonymous complaint
     $isAnonymous = isset($_POST['is_anonymous']) && $_POST['is_anonymous'] == '1';
@@ -46,25 +50,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $u = $_FILES['evidence'];
             $allowed = ['image/jpeg', 'image/png', 'application/pdf', 'video/mp4'];
 
-            if (!in_array($u['type'], $allowed)) {
-                $err = 'Unsupported file type. Allowed: JPG, PNG, PDF, MP4';
-            } elseif ($u['size'] > 20 * 1024 * 1024) {
-                $err = 'File too large. Maximum 20MB.';
+            if (!empty($_FILES['evidence']) && $_FILES['evidence']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $evidenceFile = $_FILES['evidence'];
+
+            // Strict allow-list: images + selected document/media types
+            $allowedEvidenceTypes = [
+                'jpg'  => ['image/jpeg', 'image/pjpeg'],
+                'jpeg' => ['image/jpeg', 'image/pjpeg'],
+                'png'  => ['image/png'],
+                'pdf'  => ['application/pdf'],
+                'mp4'  => ['video/mp4', 'video/x-m4v'],
+            ];
+
+            $maxEvidenceSize = 20 * 1024 * 1024; // 20MB
+            $uploadError = null;
+            $destDir = __DIR__ . '/uploads';
+
+            $storedName = js_secure_upload($evidenceFile, $allowedEvidenceTypes, $destDir, $maxEvidenceSize, $uploadError, 'evidence');
+
+            if ($uploadError !== null) {
+                $err = $uploadError . ' Allowed types: JPG, JPEG, PNG, PDF, MP4.';
             } else {
-                $ext = pathinfo($u['name'], PATHINFO_EXTENSION);
-                $safe = bin2hex(random_bytes(16)) . '.' . $ext;
-                $destDir = __DIR__ . '/uploads';
-
-                if (!is_dir($destDir)) {
-                    mkdir($destDir, 0755, true);
-                }
-
-                $dest = $destDir . '/' . $safe;
-                if (move_uploaded_file($u['tmp_name'], $dest)) {
-                    $uploadedFile = $safe;
-                } else {
-                    $err = 'Failed to upload file.';
-                }
+                $uploadedFile = $storedName;
             }
         }
 
@@ -217,6 +224,7 @@ body {
                 <?php endif; ?>
 
                 <form method="post" enctype="multipart/form-data" id="complaintForm">
+                    <?php echo csrf_token_field(); ?>
                     
                     <!-- Anonymous Reporting Option -->
                     <section class="mb-4 p-3" style="background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">

@@ -4,37 +4,47 @@ require_once __DIR__ . '/config.php';
 $err = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $id = trim($_POST['id'] ?? '');
-  $password = $_POST['password'] ?? '';
-
-  if (!$id || !$password) {
-    $err = 'Please enter both email/mobile and password.';
+  // CSRF Protection
+  if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+    $err = 'Invalid security token. Please try again.';
   } else {
-    $stmt = $mysqli->prepare('SELECT id, name, password_hash FROM users WHERE email = ? OR mobile = ?');
+    $id = trim($_POST['id'] ?? '');
+    $password = $_POST['password'] ?? '';
 
-    if ($stmt) {
-      $stmt->bind_param('ss', $id, $id);
+    if (!$id || !$password) {
+      $err = 'Please enter both email/mobile and password.';
+    } else {
+      $stmt = $mysqli->prepare('SELECT id, name, password_hash FROM users WHERE email = ? OR mobile = ?');
 
-      if ($stmt->execute()) {
-        $res = $stmt->get_result();
-        $row = $res->fetch_assoc();
+      if ($stmt) {
+        $stmt->bind_param('ss', $id, $id);
 
-        if ($row && password_verify($password, $row['password_hash'])) {
-          $_SESSION['user_id'] = $row['id'];
-          $_SESSION['user_name'] = $row['name'];
-          header('Location: profile.php');
-          exit;
+        if ($stmt->execute()) {
+          $res = $stmt->get_result();
+          $row = $res->fetch_assoc();
+
+          if ($row && password_verify($password, $row['password_hash'])) {
+            // Session Fixation Protection - Regenerate session ID
+            session_regenerate_id(true);
+            $_SESSION['user_id'] = $row['id'];
+            $_SESSION['user_name'] = $row['name'];
+            // Regenerate CSRF token after successful login
+            unset($_SESSION['csrf_token']);
+            header('Location: profile.php');
+            exit;
+          } else {
+            $err = 'Invalid email/mobile or password.';
+          }
         } else {
-          $err = 'Invalid email/mobile or password.';
+          $err = 'Database error. Please try again.';
         }
       } else {
         $err = 'Database error. Please try again.';
       }
-    } else {
-      $err = 'Database error. Please try again.';
     }
   }
-}
+  }
+
 ?>
 
 <!doctype html>
@@ -234,6 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="auth-body">
             <?php if ($err): ?><div class="alert alert-danger"><?= e($err) ?></div><?php endif; ?>
             <form method="post" id="loginForm" novalidate>
+              <?php echo csrf_token_field(); ?>
               <div class="mb-3">
                 <label class="form-label">Email or Mobile Number</label>
                 <input class="form-control" name="id" type="text" autocomplete="username" placeholder="Enter email or mobile number" required>

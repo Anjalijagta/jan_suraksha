@@ -99,6 +99,7 @@ body {
                             Learn how to protect yourself from online frauds, phishing scams,
                             and secure your digital identity.
                         </p>
+                        <a href="https://cybercrime.gov.in/Webform/Crime_OnlineSafetyTips.aspx" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary mt-auto">View Official Guidelines</a>
                     </div>
                 </div>
             </div>
@@ -112,6 +113,7 @@ body {
                             Essential guidelines and resources to enhance personal safety
                             for women in public and private spaces.
                         </p>
+                        <a href="https://www.ncw.gov.in/other-useful-helplines/" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary mt-auto">View Official Guidelines</a>
                     </div>
                 </div>
             </div>
@@ -125,6 +127,7 @@ body {
                             Understand the basic laws and your rights as a citizen.
                             Knowledge is the first step towards protection.
                         </p>
+                        <a href="https://www.indiacode.nic.in/" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary mt-auto">View Official Guidelines</a>
                     </div>
                 </div>
             </div>
