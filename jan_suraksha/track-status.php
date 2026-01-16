@@ -165,7 +165,7 @@ body {
                             <i class="bi bi-card-text me-2 text-primary"></i>Enter Complaint ID or Anonymous Tracking ID
                         </label>
                         <input type="text" class="form-control status-form-input fs-5 py-3" 
-                               id="code" name="code" placeholder="e.g., IN/2026/12345 or ANON-2026-ABC123" required 
+                               id="code" name="code" placeholder="e.g., IN/YYYY/12345 or ANON-YYYY-ABC123" required 
                                value="<?= e($_POST['code'] ?? '') ?>">
                     </div>
                     <?php if($err): ?>
