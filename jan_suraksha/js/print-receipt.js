@@ -500,16 +500,4 @@
         checkQRCodeLibrary();
     }
 
-    // Expose utility functions for debugging (optional)
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        window.DebugPrintReceipt = {
-            getComplaintData,
-            getUserData,
-            formatDate,
-            generateQRCode,
-            printReceipt
-        };
-        console.log('Debug functions available at: window.DebugPrintReceipt');
-    }
-
 })();
