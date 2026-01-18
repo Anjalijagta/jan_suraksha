@@ -414,11 +414,11 @@
 
     /* Typography for print */
     h1, h2, h3, h4, h5, h6 {
-        color: #000 !important;
+        color: #000;
     }
 
     p, li, span, div {
-        color: #000 !important;
+        color: #000;
     }
 
     /* Remove background images and colors within the receipt */
