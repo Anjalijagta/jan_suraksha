@@ -421,8 +421,9 @@
         color: #000 !important;
     }
 
-    /* Remove background images and colors */
-    * {
+    /* Remove background images and colors within the receipt */
+    .receipt-container,
+    .receipt-container * {
         background-image: none !important;
         text-shadow: none !important;
     }
