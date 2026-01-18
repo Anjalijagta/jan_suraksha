@@ -1,0 +1,309 @@
+/**
+ * Anonymous Complaint Feature Styling
+ * Issue: #131 - Add anonymous crime reporting option
+ * Styles for anonymous checkbox, disclaimer, badges, and tracking displays
+ */
+
+/* ===================================
+   Anonymous Checkbox Section
+   =================================== */
+
+/* Make the checkbox larger and more prominent */
+#anonymous-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    margin-top: 0.25rem;
+}
+
+/* Style the checkbox label */
+.form-check-label[for="anonymous-checkbox"] {
+    cursor: pointer;
+    user-select: none;
+}
+
+.form-check-label[for="anonymous-checkbox"]:hover {
+    opacity: 0.9;
+}
+
+/* ===================================
+   Anonymous Disclaimer Box
+   =================================== */
+
+#anonymous-disclaimer {
+    animation: fadeIn 0.3s ease-in-out;
+    border-radius: 8px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===================================
+   Personal Info Section Transitions
+   =================================== */
+
+#personal-info-section {
+    transition: opacity 0.3s ease, max-height 0.3s ease, margin-bottom 0.3s ease;
+    overflow: hidden;
+}
+
+#personal-info-section.hidden {
+    opacity: 0;
+    max-height: 0;
+    margin-bottom: 0 !important;
+}
+
+/* ===================================
+   Anonymous Success Page Styling
+   =================================== */
+
+/* Tracking ID Display Box */
+.tracking-id-box {
+    background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+    box-shadow: 0 8px 24px rgba(13, 110, 253, 0.3);
+}
+
+.tracking-id-display {
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.tracking-id-display:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Copy Button Styling */
+.copy-btn {
+    transition: all 0.3s ease;
+    font-weight: 600;
+    border: none;
+    padding: 0.75rem 1.5rem;
+}
+
+.copy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.copy-btn:active {
+    transform: translateY(0);
+}
+
+.copy-btn.copied {
+    background-color: #28a745 !important;
+    color: white !important;
+    animation: pulse 0.5s ease;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Warning Box */
+.warning-box {
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Success Icon Animation */
+.success-icon {
+    animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) rotate(0);
+        opacity: 1;
+    }
+}
+
+/* ===================================
+   Anonymous Badges (Admin & Tracking)
+   =================================== */
+
+/* Anonymous Badge Styling */
+.badge.bg-warning.text-dark {
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Lock icon in badges */
+.badge i.bi-shield-lock,
+.badge i.bi-lock-fill {
+    font-size: 1rem;
+}
+
+/* ===================================
+   Protected Info Display
+   =================================== */
+
+/* Style for "Protected (Anonymous)" text */
+.text-muted.fst-italic i.bi-lock-fill {
+    color: #ffc107;
+    margin-right: 0.25rem;
+}
+
+/* ===================================
+   Action Buttons Grid
+   =================================== */
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.action-buttons .btn {
+    white-space: nowrap;
+}
+
+/* ===================================
+   Responsive Design
+   =================================== */
+
+@media (max-width: 768px) {
+    /* Smaller tracking ID display on mobile */
+    .tracking-id-display {
+        font-size: 1.25rem !important;
+        letter-spacing: 1px !important;
+        padding: 0.75rem !important;
+    }
+    
+    /* Stack action buttons vertically */
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Adjust checkbox size for mobile */
+    #anonymous-checkbox {
+        width: 18px;
+        height: 18px;
+    }
+    
+    /* Reduce disclaimer padding on mobile */
+    #anonymous-disclaimer {
+        padding: 1rem !important;
+        font-size: 0.9rem;
+    }
+    
+    /* Smaller success icon on mobile */
+    .success-icon {
+        font-size: 3.5rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Extra small screens */
+    .tracking-id-display {
+        font-size: 1rem !important;
+        word-break: break-all;
+    }
+    
+    .copy-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* ===================================
+   Dark Mode Adjustments
+   =================================== */
+
+@media (prefers-color-scheme: dark) {
+    .warning-box {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-color: #ffc107;
+    }
+    
+    #anonymous-disclaimer {
+        background-color: rgba(13, 202, 240, 0.1);
+        border-left-color: #0dcaf0;
+    }
+}
+
+/* ===================================
+   Print Styles (Hide anonymous badges in print)
+   =================================== */
+
+@media print {
+    #anonymous-disclaimer,
+    .badge.bg-warning,
+    .copy-btn,
+    .action-buttons {
+        display: none !important;
+    }
+    
+    .tracking-id-display {
+        border: 2px solid #000 !important;
+        color: #000 !important;
+        background: #fff !important;
+    }
+}
+
+/* ===================================
+   Accessibility Enhancements
+   =================================== */
+
+/* Focus styles for keyboard navigation */
+#anonymous-checkbox:focus {
+    outline: 2px solid #0d6efd;
+    outline-offset: 2px;
+}
+
+.copy-btn:focus {
+    outline: 3px solid #0d6efd;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .tracking-id-display {
+        border-width: 3px;
+    }
+    
+    .badge {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}

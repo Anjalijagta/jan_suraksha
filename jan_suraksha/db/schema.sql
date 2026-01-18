@@ -25,17 +25,22 @@ CREATE TABLE complaints (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT DEFAULT 0,
   complaint_code VARCHAR(100) NOT NULL UNIQUE,
-  complainant_name VARCHAR(255),
-  mobile VARCHAR(50),
+  complainant_name VARCHAR(255) DEFAULT NULL,
+  mobile VARCHAR(50) DEFAULT NULL,
   crime_type VARCHAR(100),
   date_filed DATETIME DEFAULT CURRENT_TIMESTAMP,
   location TEXT,
   description TEXT,
   evidence VARCHAR(255),
   status VARCHAR(50) DEFAULT 'Submitted',
+  is_anonymous TINYINT(1) DEFAULT 0 NOT NULL COMMENT 'Flag: 1 = Anonymous, 0 = Regular',
+  anonymous_tracking_id VARCHAR(100) DEFAULT NULL COMMENT 'Unique tracking ID for anonymous complaints',
   updated_at DATETIME NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+  UNIQUE KEY unique_anonymous_tracking_id (anonymous_tracking_id),
+  INDEX idx_is_anonymous (is_anonymous),
+  INDEX idx_anonymous_lookup (is_anonymous, anonymous_tracking_id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE articles (

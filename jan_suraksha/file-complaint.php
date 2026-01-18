@@ -14,25 +14,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             $err = 'Please login before filing a complaint.';
         }
 
-        $name = trim($_POST['name'] ?? '');
-        $mobile = trim($_POST['mobile'] ?? '');
-        $house = trim($_POST['house'] ?? '');
-        $city = trim($_POST['city'] ?? '');
-        $state = trim($_POST['state'] ?? '');
-        $pincode = trim($_POST['pincode'] ?? '');
-        $crime = trim($_POST['crime_type'] ?? '');
-        $date = trim($_POST['incident_date'] ?? '');
-        $location = trim($_POST['location'] ?? '');
-        $desc = trim($_POST['description'] ?? '');
+    // Check if this is an anonymous complaint
+    $isAnonymous = isset($_POST['is_anonymous']) && $_POST['is_anonymous'] == '1';
 
-        // Validation
+    $name = trim($_POST['name'] ?? '');
+    $mobile = trim($_POST['mobile'] ?? '');
+    $house = trim($_POST['house'] ?? '');
+    $city = trim($_POST['city'] ?? '');
+    $state = trim($_POST['state'] ?? '');
+    $pincode = trim($_POST['pincode'] ?? '');
+    $crime = trim($_POST['crime_type'] ?? '');
+    $date = trim($_POST['incident_date'] ?? '');
+    $location = trim($_POST['location'] ?? '');
+    $desc = trim($_POST['description'] ?? '');
+
+    // Validation - Different rules for anonymous vs regular complaints
+    if ($isAnonymous) {
+        // Anonymous complaint - only crime type and description required
+        if (!$crime) {
+            $err = 'Crime type is required.';
+        } elseif (!$desc) {
+            $err = 'Detailed description is required.';
+        }
+    } else {
+        // Regular complaint - name, mobile, and crime type required
         if (!$name || !preg_match('/^[0-9]{10}$/', $mobile) || !$crime) {
-            $err = 'Fill required fields: name, 10-digit mobile, crime type.';
-        } elseif ($pincode && !preg_match('/^[0-9]{6}$/', $pincode)) {
+    }
+
+    // Handle file upload only if there are no validation errors
+    if ($err === '') {
             $err = 'Pincode must be 6 digits.';
-        } else {
-            // Handle file upload (evidence)
-            $uploadedFile = null;
+        }
+    } else {
+        // Handle file upload
+        $uploadedFile = null;
+        if (!empty($_FILES['evidence']) && $_FILES['evidence']['error'] === UPLOAD_ERR_OK) {
+            $u = $_FILES['evidence'];
+            $allowed = ['image/jpeg', 'image/png', 'application/pdf', 'video/mp4'];
 
             if (!empty($_FILES['evidence']) && $_FILES['evidence']['error'] !== UPLOAD_ERR_NO_FILE) {
             $evidenceFile = $_FILES['evidence'];
@@ -64,10 +82,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             $prefix = 'IN/' . date('Y') . '/';
             $code = $prefix . str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT);
 
-            // Combine address fields
-            $complainantAddress = trim("$house, $city, $state - $pincode");
-            if ($complainantAddress === ',  -') {
-                $complainantAddress = '';
+            // Generate anonymous tracking ID if this is an anonymous complaint
+            $anonymousTrackingId = null;
+            if ($isAnonymous) {
+                // Format: ANON-YYYY-XXXXXX (6 random hex characters)
+                $anonymousTrackingId = 'ANON-' . date('Y') . '-' . strtoupper(bin2hex(random_bytes(3)));
+            }
+
+            // Combine address fields (only for regular complaints)
+            $complainantAddress = '';
+            if (!$isAnonymous) {
+                $complainantAddress = trim("$house, $city, $state - $pincode");
+                if ($complainantAddress === ',  -') {
+                    $complainantAddress = '';
+                }
             }
 
             // Prepend address to description
@@ -76,8 +104,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                 $finalDescription = "Complainant Address: " . $complainantAddress . "\n\n---\n\n" . $desc;
             }
 
-            // Prepare INSERT statement
-            $stmt = $mysqli->prepare('INSERT INTO complaints (user_id, complaint_code, complainant_name, mobile, crime_type, date_filed, location, description, evidence, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            // Prepare INSERT statement with anonymous support
+            $stmt = $mysqli->prepare('INSERT INTO complaints (user_id, complaint_code, complainant_name, mobile, crime_type, date_filed, location, description, evidence, status, is_anonymous, anonymous_tracking_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
 
             if ($stmt === false) {
                 $err = 'Database error: ' . $mysqli->error;
@@ -85,13 +113,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                 $uid = (int)$user_id;
                 $uploadedFile = $uploadedFile ?? '';
                 $status = 'Pending';
+                
+                // For anonymous complaints, set name and mobile to NULL
+                $finalName = $isAnonymous ? null : $name;
+                $finalMobile = $isAnonymous ? null : $mobile;
+                $isAnonymousFlag = $isAnonymous ? 1 : 0;
 
-                $stmt->bind_param('isssssssss', $uid, $code, $name, $mobile, $crime, $date, $location, $finalDescription, $uploadedFile, $status);
+                $stmt->bind_param('issssssssiis', $uid, $code, $finalName, $finalMobile, $crime, $date, $location, $finalDescription, $uploadedFile, $status, $isAnonymousFlag, $anonymousTrackingId);
 
                 if ($stmt->execute()) {
-                    // Regenerate CSRF token after successful submission
-                    unset($_SESSION['csrf_token']);
-                    header('Location: complain-success.php?code=' . urlencode($code));
+                    // Redirect to appropriate success page
+                    if ($isAnonymous) {
+                        header('Location: anonymous-success.php?tracking_id=' . urlencode($anonymousTrackingId));
+                    } else {
+                        header('Location: complain-success.php?code=' . urlencode($code));
+                    }
                     exit;
                 } else {
                     $err = 'Error filing complaint: ' . $stmt->error;
@@ -102,6 +138,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 }
 ?>
 <?php include 'header.php'; ?>
+
+<link rel="stylesheet" href="css/anonymous.css">
 
 <style>
     .form-container {
@@ -190,7 +228,34 @@ body {
                 <form method="post" enctype="multipart/form-data" id="complaintForm">
                     <?php echo csrf_token_field(); ?>
                     
-                    <section class="mb-4">
+                    <!-- Anonymous Reporting Option -->
+                    <section class="mb-4 p-3" style="background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="anonymous-checkbox" name="is_anonymous" value="1">
+                            <label class="form-check-label" for="anonymous-checkbox">
+                                <strong>🔒 Report Anonymously</strong>
+                                <p class="text-muted small mb-0">Your identity will be protected. Personal information fields will be hidden.</p>
+                            </label>
+                        </div>
+                        
+                        <!-- Privacy Disclaimer (Hidden by default, shown when anonymous is checked) -->
+                        <div id="anonymous-disclaimer" class="alert alert-info mt-3" style="display: none; border-left: 4px solid #0dcaf0;">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-info-circle-fill me-2 mt-1" style="font-size: 1.25rem;"></i>
+                                <div>
+                                    <h6 class="mb-2"><strong>⚠️ Important: Anonymous Reporting</strong></h6>
+                                    <ul class="mb-0 small">
+                                        <li>Your identity will be completely protected</li>
+                                        <li><strong>Save your tracking ID securely</strong> - you cannot recover it later</li>
+                                        <li>Anonymous complaints may take longer to investigate</li>
+                                        <li>No personal information will be stored in our system</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <section class="mb-4" id="personal-info-section">
                         <h2 class="form-section-heading">Complainant Details</h2>
                         <div class="mb-3">
                             <label for="name" class="form-label">Complainant's Name</label>
@@ -307,5 +372,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<script src="js/anonymous-handler.js"></script>
 
 <?php include 'footer.php'; ?>
