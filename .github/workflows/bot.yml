@@ -1,0 +1,45 @@
+name: Jan Suraksha Bot
+
+# Trigger: Run on every Pull Request
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+# Permissions: Allow the bot to write comments
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  review-and-welcome:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # STEP 1: The Bot Replies
+      - name: Send Welcome Comment
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const user = context.payload.pull_request.user.login;
+            const message = `
+            👋 **Hi @${user}!** Thanks for contributing to the **Jan Suraksha** project! 🛡️
+            I am the repository bot. I have started checking your code for errors.
+            
+            Please wait for the checks to complete below. 👇
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: message
+            });
+
+      # STEP 2: The Bot Checks the Code (PHP Syntax)
+      - name: Check PHP Syntax
+        run: |
+          echo "🔍 Scanning PHP files for syntax errors..."
+          # This command finds all .php files and checks them for errors
+          find . -name "*.php" -print0 | xargs -0 -n1 php -l
