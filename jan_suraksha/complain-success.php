@@ -21,8 +21,19 @@ if ($code) {
 <!-- Print Receipt Styles -->
 <link rel="stylesheet" href="/css/print-receipt.css">
 
-<!-- QRCode.js Library for QR Code Generation -->
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<!-- QRCode.js Library for QR Code Generation (local first, CDN fallback) -->
+<script src="js/qrcode.min.js"></script>
+<script>
+    // Fallback to CDN if local QRCode.js failed to load for any reason
+    if (typeof QRCode === 'undefined') {
+        (function () {
+            var script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
+            script.defer = true;
+            document.head.appendChild(script);
+        }());
+    }
+</script>
 
 <!-- Print Receipt Script -->
 <script src="/js/print-receipt.js" defer></script>
