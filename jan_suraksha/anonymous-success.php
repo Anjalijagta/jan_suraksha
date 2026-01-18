@@ -214,7 +214,7 @@ body {
                          data-complaint-type="Anonymous Complaint"
                          data-location="Location Withheld"
                          data-status="Submitted"
-                         data-submission-date="<?= date('c') ?>"
+                         data-submission-date="<?= date('Y-m-d H:i:s') ?>"
                          data-complaint-id="<?= e($tracking_id) ?>"
                          data-is-anonymous="true">
                     </div>
