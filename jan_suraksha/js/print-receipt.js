@@ -11,10 +11,34 @@
     'use strict';
 
     // Global configuration
+    function getTrackingBaseUrl() {
+        try {
+            // Prefer an explicit configuration via meta tag
+            var meta = document.querySelector('meta[name="jan-suraksha-tracking-base-url"]');
+            if (meta && meta.content) {
+                var metaBase = String(meta.content).replace(/\/+$/, '');
+                return metaBase + '/jan_suraksha/track-status.php';
+            }
+
+            // Fallback to global configuration variable if provided
+            if (window.JAN_SURAKSHA_TRACKING_BASE_URL) {
+                var globalBase = String(window.JAN_SURAKSHA_TRACKING_BASE_URL).replace(/\/+$/, '');
+                return globalBase + '/jan_suraksha/track-status.php';
+            }
+
+            // Final fallback: use current origin (original behavior)
+            var originBase = String(window.location.origin || '').replace(/\/+$/, '');
+            return originBase + '/jan_suraksha/track-status.php';
+        } catch (e) {
+            // In case of any unexpected error, fall back to the original simple behavior
+            return window.location.origin + '/jan_suraksha/track-status.php';
+        }
+    }
+
     const CONFIG = {
         qrCodeSize: 150,
         qrCodeErrorCorrectionLevel: 'H',
-        trackingBaseUrl: window.location.origin + '/jan_suraksha/track-status.php',
+        trackingBaseUrl: getTrackingBaseUrl(),
         dateFormat: {
             locale: 'en-IN',
             options: {
