@@ -181,6 +181,11 @@ body {
                 </form>
             </div>
 
+            <!-- Recent Searches Section (Issue #136) -->
+            <div id="search-history-container" class="search-history">
+                <!-- History will be populated by JavaScript -->
+            </div>
+
             <?php if($status): ?>
                 <!-- Complaint Hero ID -->
                 <div class="text-center mb-5 p-4 bg-light rounded-4">
@@ -327,5 +332,8 @@ body {
         </div>
     </div>
 </main>
+
+<!-- Search History Script (Issue #136) -->
+<script src="js/search-history.js"></script>
 
 <?php include 'footer.php'; ?>

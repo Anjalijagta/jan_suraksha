@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search History Test - Issue #136</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .test-form {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .test-result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #d4edda;
+            border-radius: 8px;
+            display: none;
+        }
+        .test-result.show {
+            display: block;
+        }
+        .test-button {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-section">
+            <h1 class="mb-4">
+                <i class="bi bi-clipboard-check me-2"></i>
+                Search History Feature Test
+            </h1>
+            <p class="lead">Issue #136 - Testing Search History for Tracking Page</p>
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Instructions:</strong> Use the buttons below to test different tracking ID formats.
+                Check localStorage in DevTools (F12 → Application → localStorage)
+            </div>
+        </div>
+
+        <!-- Test Form -->
+        <div class="test-section">
+            <h3 class="mb-3">
+                <i class="bi bi-search me-2"></i>
+                Track Complaint Status
+            </h3>
+            
+            <div class="test-form">
+                <form method="post" id="test-track-form">
+                    <div class="mb-3">
+                        <label for="code" class="form-label h5">
+                            <i class="bi bi-card-text me-2 text-primary"></i>
+                            Enter Complaint ID
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-control form-control-lg" 
+                            id="code" 
+                            name="code" 
+                            placeholder="e.g., IN/2026/12345 or ANON-2026-ABC123"
+                            required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-search me-2"></i>Check Status
+                    </button>
+                </form>
+            </div>
+
+            <div class="test-result" id="test-result">
+                <i class="bi bi-check-circle me-2"></i>
+                <strong>Test Result:</strong> <span id="result-message"></span>
+            </div>
+        </div>
+
+        <!-- Quick Test Buttons -->
+        <div class="test-section">
+            <h3 class="mb-3">
+                <i class="bi bi-lightning me-2"></i>
+                Quick Test Buttons
+            </h3>
+            
+            <h5 class="mb-3">Test Valid Formats:</h5>
+            <button class="btn btn-success test-button" onclick="testTrackingId('IN/2026/12345')">
+                Test: IN/2026/12345
+            </button>
+            <button class="btn btn-success test-button" onclick="testTrackingId('IN/2026/67890')">
+                Test: IN/2026/67890
+            </button>
+            <button class="btn btn-success test-button" onclick="testTrackingId('ANON-2026-ABC123')">
+                Test: ANON-2026-ABC123
+            </button>
+            <button class="btn btn-success test-button" onclick="testTrackingId('ANON-2026-XYZ789')">
+                Test: ANON-2026-XYZ789
+            </button>
+            <button class="btn btn-success test-button" onclick="testTrackingId('JS_2026_001')">
+                Test: JS_2026_001
+            </button>
+            <button class="btn btn-success test-button" onclick="testTrackingId('JS_2026_999')">
+                Test: JS_2026_999
+            </button>
+
+            <h5 class="mb-3 mt-4">Test Invalid Formats (should NOT be saved):</h5>
+            <button class="btn btn-warning test-button" onclick="testTrackingId('INVALID123')">
+                Test: INVALID123 ❌
+            </button>
+            <button class="btn btn-warning test-button" onclick="testTrackingId('12345')">
+                Test: 12345 ❌
+            </button>
+            <button class="btn btn-warning test-button" onclick="testTrackingId('ABC-DEF-GHI')">
+                Test: ABC-DEF-GHI ❌
+            </button>
+
+            <h5 class="mb-3 mt-4">Test Actions:</h5>
+            <button class="btn btn-info test-button" onclick="showLocalStorage()">
+                <i class="bi bi-database me-2"></i>Show localStorage Data
+            </button>
+            <button class="btn btn-danger test-button" onclick="clearTestHistory()">
+                <i class="bi bi-trash me-2"></i>Clear All History
+            </button>
+        </div>
+
+        <!-- Search History Display -->
+        <div class="test-section">
+            <div id="search-history-container" class="search-history">
+                <!-- History will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- localStorage Inspector -->
+        <div class="test-section">
+            <h3 class="mb-3">
+                <i class="bi bi-database me-2"></i>
+                localStorage Inspector
+            </h3>
+            <pre id="localStorage-inspector" class="bg-light p-3 rounded" style="max-height: 300px; overflow-y: auto;">
+Click "Show localStorage Data" to see stored data
+            </pre>
+        </div>
+
+        <!-- Test Checklist -->
+        <div class="test-section">
+            <h3 class="mb-3">
+                <i class="bi bi-check2-square me-2"></i>
+                Testing Checklist
+            </h3>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <input type="checkbox" class="form-check-input me-2" id="test1">
+                    <label for="test1">Search for a tracking ID → Appears in "Recent Searches"</label>
+                </li>
+                <li class="list-group-item">
+                    <input type="checkbox" class="form-check-input me-2" id="test2">
+                    <label for="test2">Search 6 different IDs → Only last 5 are kept</label>
+                </li>
+                <li class="list-group-item">
+                    <input type="checkbox" class="form-check-input me-2" id="test3">
+                    <label for="test3">Click on a history item → Auto-fills the input</label>
+                </li>
+                <li class="list-group-item">
+                    <input type="checkbox" class="form-check-input me-2" id="test4">
+                    <label for="test4">Click "Clear History" → All history deleted</label>
+                </li>
+                <li class="list-group-item">
+                    <input type="checkbox" class="form-check-input me-2" id="test5">
+                    <label for="test5">Refresh page → History persists (localStorage)</label>
+                </li>
+                <li class="list-group-item">
+                    <input type="checkbox" class="form-check-input me-2" id="test6">
+                    <label for="test6">Test on mobile (resize window) → Responsive design works</label>
+                </li>
+                <li class="list-group-item">
+                    <input type="checkbox" class="form-check-input me-2" id="test7">
+                    <label for="test7">Test invalid tracking IDs → NOT saved to history</label>
+                </li>
+                <li class="list-group-item">
+                    <input type="checkbox" class="form-check-input me-2" id="test8">
+                    <label for="test8">Hover effects work on history items</label>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="js/search-history.js"></script>
+    <script src="js/test-search-history.js"></script>
+    <script>
+        // Test helper functions
+        function testTrackingId(trackingId) {
+            const input = document.getElementById('code');
+            input.value = trackingId;
+            
+            // Simulate saving
+            if (window.searchHistory) {
+                const saved = window.searchHistory.saveSearch(trackingId);
+                window.searchHistory.displayHistory();
+                
+                const result = document.getElementById('test-result');
+                const message = document.getElementById('result-message');
+                
+                if (saved) {
+                    message.textContent = `✅ Successfully saved: ${trackingId}`;
+                    result.className = 'test-result show bg-success text-white';
+                } else {
+                    message.textContent = `❌ Invalid format (not saved): ${trackingId}`;
+                    result.className = 'test-result show bg-warning';
+                }
+                
+                setTimeout(() => {
+                    result.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        function showLocalStorage() {
+            const inspector = document.getElementById('localStorage-inspector');
+            const data = localStorage.getItem('jan_suraksha_search_history');
+            
+            if (data) {
+                try {
+                    const parsed = JSON.parse(data);
+                    inspector.textContent = JSON.stringify(parsed, null, 2);
+                } catch (e) {
+                    inspector.textContent = data;
+                }
+            } else {
+                inspector.textContent = 'No data found in localStorage';
+            }
+        }
+
+        function clearTestHistory() {
+            if (confirm('Clear all search history?')) {
+                if (window.searchHistory) {
+                    window.searchHistory.clearHistory();
+                    showLocalStorage();
+                    alert('History cleared!');
+                }
+            }
+        }
+
+        // Prevent actual form submission in test
+        document.getElementById('test-track-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const trackingId = document.getElementById('code').value.trim();
+            if (trackingId) {
+                testTrackingId(trackingId);
+            }
+        });
+    </script>
+</body>
+</html>
