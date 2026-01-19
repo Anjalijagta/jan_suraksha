@@ -1092,6 +1092,11 @@ require_once __DIR__ . '/config.php';
               <i class="bi bi-chat-dots-fill me-1"></i> Help
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'contributors.php' ? 'active' : ''; ?>" href="contributors.php">
+              <i class="bi bi-chat-dots-fill me-1"></i> Contributors
+            </a>
+          </li>
           
           <!-- More Dropdown -->
           <li class="nav-item dropdown">
