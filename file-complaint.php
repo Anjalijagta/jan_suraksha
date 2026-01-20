@@ -43,6 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     } else {
         // Regular complaint - name, mobile, and crime type required
         if (!$name || !preg_match('/^[0-9]{10}$/', $mobile) || !$crime) {
+            $err = 'Name, valid mobile number (10 digits), and crime type are required.';
+        }
     }
 
     // Validate urgent flag justification
@@ -60,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     if ($err === '') {
             $err = 'Pincode must be 6 digits.';
         }
-    } else {
+    } else { 
         // Handle file upload
         $uploadedFile = null;
         if (!empty($_FILES['evidence']) && $_FILES['evidence']['error'] === UPLOAD_ERR_OK) {
