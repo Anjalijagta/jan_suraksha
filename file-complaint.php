@@ -43,6 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     } else {
         // Regular complaint - name, mobile, and crime type required
         if (!$name || !preg_match('/^[0-9]{10}$/', $mobile) || !$crime) {
+            $err = 'Name, valid 10-digit mobile number, and crime type are required.';
+        }
             $err = 'Name, valid mobile number (10 digits), and crime type are required.';
         }
     }
