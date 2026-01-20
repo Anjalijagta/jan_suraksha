@@ -3,7 +3,7 @@ require_once __DIR__ . '/config.php';
 
 $err = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // CSRF Protection
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
         $err = 'Invalid security token. Please refresh the page and try again.';
