@@ -202,13 +202,6 @@ function getUrgentComplaintEmailHTML($data) {
             font-weight: 700;
             font-size: 16px;
             box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
-            transition: all 0.3s ease;
-        }
-        
-        .cta-button:hover {
-            background: linear-gradient(135deg, #1d4ed8, #1e40af);
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
-            transform: translateY(-2px);
         }
         
         /* Footer section */
