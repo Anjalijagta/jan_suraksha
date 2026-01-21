@@ -342,7 +342,7 @@ function getUrgentComplaintEmailHTML($data) {
             </div>
             
             <div class="disclaimer">
-                <strong>⏰ Action Required:</strong> Please review this complaint as soon as possible. Time-sensitive complaints require immediate attention to ensure public safety.
+                <strong>Action Required:</strong> Please review this complaint as soon as possible. Time-sensitive complaints require immediate attention to ensure public safety.
             </div>
         </div>
         
