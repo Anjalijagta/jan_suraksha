@@ -28,23 +28,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     $location = trim($_POST['location'] ?? '');
     $desc = trim($_POST['description'] ?? '');
 
-    // Validation - Different rules for anonymous vs regular complaints
-    if ($isAnonymous) {
-        // Anonymous complaint - only crime type and description required
-        if (!$crime) {
-            $err = 'Crime type is required.';
-        } elseif (!$desc) {
-            $err = 'Detailed description is required.';
-        }
-    } else {
-        // Regular complaint - name, mobile, and crime type required
-        if (!$name || !preg_match('/^[0-9]{10}$/', $mobile) || !$crime) {
-    }
+    // Urgent flag processing
+    $isUrgent = isset($_POST['is_urgent']) && $_POST['is_urgent'] == '1';
+    $urgencyJustification = trim($_POST['urgency_justification'] ?? '');
 
-    // Handle file upload only if there are no validation errors
-    if ($err === '') {
-            $err = 'Pincode must be 6 digits.';
-        }
+    // Validation
+    if (!$name || !preg_match('/^[0-9]{10}$/', $mobile) || !$crime) {
+        $err = 'Fill required fields: name, 10-digit mobile, crime type.';
+    } elseif ($pincode && !preg_match('/^[0-9]{6}$/', $pincode)) {
+        $err = 'Pincode must be 6 digits.';
+    } elseif ($isUrgent && empty($urgencyJustification)) {
+        $err = 'Justification is required when marking complaint as urgent.';
+    } elseif ($isUrgent && mb_strlen($urgencyJustification) < 10) {
+        $err = 'Urgency justification must be at least 10 characters.';
+    } elseif ($isUrgent && mb_strlen($urgencyJustification) > 500) {
+        $err = 'Urgency justification cannot exceed 500 characters.';
     } else {
         // Handle file upload
         $uploadedFile = null;
@@ -104,8 +102,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                 $finalDescription = "Complainant Address: " . $complainantAddress . "\n\n---\n\n" . $desc;
             }
 
-            // Prepare INSERT statement with anonymous support
-            $stmt = $mysqli->prepare('INSERT INTO complaints (user_id, complaint_code, complainant_name, mobile, crime_type, date_filed, location, description, evidence, status, is_anonymous, anonymous_tracking_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            // Prepare INSERT statement with urgent flag support
+            $stmt = $mysqli->prepare('INSERT INTO complaints (user_id, complaint_code, complainant_name, mobile, crime_type, date_filed, location, description, evidence, status, is_urgent, urgency_justification, urgent_marked_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
 
             if ($stmt === false) {
                 $err = 'Database error: ' . $mysqli->error;
@@ -114,12 +112,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                 $uploadedFile = $uploadedFile ?? '';
                 $status = 'Pending';
                 
-                // For anonymous complaints, set name and mobile to NULL
-                $finalName = $isAnonymous ? null : $name;
-                $finalMobile = $isAnonymous ? null : $mobile;
-                $isAnonymousFlag = $isAnonymous ? 1 : 0;
+                // Sanitize urgency justification (XSS protection)
+                $sanitizedJustification = $isUrgent ? htmlspecialchars($urgencyJustification, ENT_QUOTES, 'UTF-8') : null;
+                $urgentFlag = $isUrgent ? 1 : 0;
+                // Set timestamp only for urgent complaints, NULL otherwise
+                $urgentTimestamp = $isUrgent ? date('Y-m-d H:i:s') : null;
 
-                $stmt->bind_param('issssssssiis', $uid, $code, $finalName, $finalMobile, $crime, $date, $location, $finalDescription, $uploadedFile, $status, $isAnonymousFlag, $anonymousTrackingId);
+                $stmt->bind_param('issssssssiiss', $uid, $code, $name, $mobile, $crime, $date, $location, $finalDescription, $uploadedFile, $status, $urgentFlag, $sanitizedJustification, $urgentTimestamp);
 
                 if ($stmt->execute()) {
                     // Redirect to appropriate success page
@@ -307,6 +306,42 @@ body {
                         <textarea class="form-control" id="description" name="description" rows="5" placeholder="Provide a detailed description of the incident" required></textarea>
                     </section>
 
+                    <!-- Urgent Complaint Flag Section -->
+                    <section class="mb-4 urgent-flag-section">
+                        <div class="urgent-checkbox-wrapper">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="urgent-checkbox" name="is_urgent" value="1">
+                                <label class="form-check-label" for="urgent-checkbox">
+                                    <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                                    <strong>Mark as Urgent</strong>
+                                </label>
+                            </div>
+                            <p class="urgent-help-text text-muted small mb-0 mt-1">
+                                Check this box for time-sensitive emergencies (e.g., assault in progress, kidnapping, immediate danger)
+                            </p>
+                        </div>
+                        
+                        <!-- Justification Field (Hidden by Default) -->
+                        <div id="urgency-justification-container" class="urgency-justification-container mt-3" style="display: none;">
+                            <label for="urgency_justification" class="form-label">
+                                <i class="bi bi-chat-left-text text-danger me-1"></i>
+                                Why is this urgent? <span class="text-danger">*</span>
+                            </label>
+                            <textarea 
+                                class="form-control" 
+                                id="urgency_justification" 
+                                name="urgency_justification" 
+                                rows="3" 
+                                maxlength="500"
+                                placeholder="Example: Suspect is still at the location, victim needs immediate medical attention, ongoing criminal activity, etc."
+                            ></textarea>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <small class="text-muted">Minimum 10 characters required</small>
+                                <small class="text-muted" id="char-counter">0 / 500</small>
+                            </div>
+                        </div>
+                    </section>
+
                     <section class="mb-4">
                         <h2 class="form-section-heading">Evidence Upload</h2>
                         <div id="upload-area" class="upload-area">
@@ -368,6 +403,62 @@ document.addEventListener('DOMContentLoaded', function() {
             fileNameDisplay.textContent = 'Selected: ' + fileInput.files[0].name;
         } else {
             fileNameDisplay.textContent = '';
+        }
+    });
+
+    // ===== URGENT FLAG FUNCTIONALITY =====
+    const urgentCheckbox = document.getElementById('urgent-checkbox');
+    const justificationContainer = document.getElementById('urgency-justification-container');
+    const justificationTextarea = document.getElementById('urgency_justification');
+    const charCounter = document.getElementById('char-counter');
+    const complaintForm = document.getElementById('complaintForm');
+
+    // Toggle justification field when checkbox is clicked
+    urgentCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            justificationContainer.style.display = 'block';
+            justificationTextarea.setAttribute('required', 'required');
+        } else {
+            justificationContainer.style.display = 'none';
+            justificationTextarea.removeAttribute('required');
+            justificationTextarea.value = ''; // Clear field when unchecked
+            charCounter.textContent = '0 / 500';
+        }
+    });
+
+    // Character counter for justification field
+    justificationTextarea.addEventListener('input', function() {
+        const length = this.value.length;
+        charCounter.textContent = length + ' / 500';
+        
+        // Change color if minimum not met
+        if (urgentCheckbox.checked && length < 10) {
+            charCounter.classList.add('text-danger');
+            charCounter.classList.remove('text-muted');
+        } else {
+            charCounter.classList.remove('text-danger');
+            charCounter.classList.add('text-muted');
+        }
+    });
+
+    // Client-side validation on form submit
+    complaintForm.addEventListener('submit', function(e) {
+        if (urgentCheckbox.checked) {
+            const justification = justificationTextarea.value.trim();
+            
+            if (justification.length === 0) {
+                e.preventDefault();
+                alert('Please provide a justification for marking this complaint as urgent.');
+                justificationTextarea.focus();
+                return false;
+            }
+            
+            if (justification.length < 10) {
+                e.preventDefault();
+                alert('Urgency justification must be at least 10 characters long.');
+                justificationTextarea.focus();
+                return false;
+            }
         }
     });
 });
