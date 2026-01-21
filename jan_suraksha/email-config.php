@@ -22,8 +22,19 @@
 // ============================================
 
 // Primary admin email - urgent complaint notifications will be sent here
+// IMPORTANT: This is a placeholder value and MUST be changed in real deployments.
+// Set this to a valid, monitored administrator email address before enabling email notifications.
 define('ADMIN_EMAIL', 'admin@jansuraksha.com');
 
+// Fail fast if the placeholder admin email has not been changed.
+if (ADMIN_EMAIL === 'admin@jansuraksha.com') {
+    trigger_error(
+        'ADMIN_EMAIL is still set to the default placeholder "admin@jansuraksha.com". ' .
+        'Please update jan_suraksha/email-config.php to use a real administrator email address.',
+        E_USER_ERROR
+    );
+    exit;
+}
 // Optional: Additional CC recipients (comma-separated)
 // Example: 'supervisor@jansuraksha.com,manager@jansuraksha.com'
 define('ADMIN_EMAIL_CC', '');
