@@ -317,7 +317,7 @@ $current_page = 'cases.php'; // CORRECTED
                         <!-- Phase 2: Urgency Information Section -->
                         <div class="urgency-section">
                             <div class="d-flex align-items-center justify-content-between mb-3">
-                                <span class="urgent-badge-large">
+                                <span class="urgent-badge-large" role="status" aria-label="Urgent complaint">
                                     <i class="bi bi-exclamation-triangle-fill"></i>
                                     URGENT COMPLAINT
                                 </span>
