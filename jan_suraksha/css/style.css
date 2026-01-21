@@ -1,3 +1,150 @@
 /* Minimal styles */
 body { padding-top: 70 px; }
 .jumbotron { background: linear-gradient(180deg,#f8f9fa,#e9ecef); }
+
+/* ===== URGENT COMPLAINT FLAG STYLES - PHASE 1 ===== */
+
+/* Urgent Flag Section Container */
+.urgent-flag-section {
+    background-color: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 8px;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+/* Checkbox Wrapper */
+.urgent-checkbox-wrapper {
+    margin-bottom: 0;
+}
+
+/* Custom Checkbox Styling */
+.urgent-flag-section .form-check-input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.15rem;
+    cursor: pointer;
+    border: 2px solid #dc3545;
+}
+
+.urgent-flag-section .form-check-input:checked {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.urgent-flag-section .form-check-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+/* Checkbox Label */
+.urgent-flag-section .form-check-label {
+    font-size: 1rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.urgent-flag-section .form-check-label strong {
+    color: #d32f2f;
+}
+
+/* Warning Icon */
+.urgent-flag-section .bi-exclamation-triangle-fill {
+    font-size: 1.1rem;
+    vertical-align: middle;
+}
+
+/* Help Text */
+.urgent-help-text {
+    margin-left: 2rem;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+/* Justification Container */
+.urgency-justification-container {
+    border-left: 4px solid #dc3545;
+    padding-left: 1rem;
+    padding-top: 0.5rem;
+    background-color: #fff;
+    border-radius: 4px;
+}
+
+/* Justification Label */
+.urgency-justification-container .form-label {
+    font-weight: 600;
+    color: #d32f2f;
+    margin-bottom: 0.5rem;
+}
+
+/* Justification Textarea */
+.urgency-justification-container .form-control {
+    border: 2px solid #ffc107;
+    background-color: #fffbf0;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.urgency-justification-container .form-control:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.15);
+    background-color: #fff;
+}
+
+/* Character Counter */
+#char-counter {
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+#char-counter.text-danger {
+    font-weight: 700;
+}
+
+/* Hover Effect on Section */
+.urgent-flag-section:hover {
+    border-color: #ffb300;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+}
+
+/* Mobile Responsive */
+@media (max-width: 576px) {
+    .urgent-flag-section {
+        padding: 1rem;
+    }
+    
+    .urgent-help-text {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+    
+    .urgency-justification-container {
+        padding-left: 0.75rem;
+    }
+    
+    .urgent-flag-section .form-check-label strong {
+        font-size: 0.95rem;
+    }
+}
+
+/* Animation for showing justification field */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.urgency-justification-container[style*="display: block"] {
+    animation: slideDown 0.3s ease-out;
+}
+
+/* Focus State for Accessibility */
+.urgent-flag-section .form-check-input:focus-visible {
+    outline: 2px solid #dc3545;
+    outline-offset: 2px;
+}
+
+/* ===== END URGENT COMPLAINT FLAG STYLES ===== */

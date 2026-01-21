@@ -21,9 +21,10 @@ ADD COLUMN urgency_justification TEXT DEFAULT NULL COMMENT 'Required explanation
 ALTER TABLE complaints 
 ADD COLUMN urgent_marked_at TIMESTAMP NULL DEFAULT NULL COMMENT 'Timestamp when complaint was marked urgent';
 
--- Create index on is_urgent for faster filtering of urgent complaints
--- This improves query performance when admins filter by urgent status
-CREATE INDEX idx_complaints_urgent ON complaints(is_urgent);
+-- Create composite index on is_urgent and urgent_marked_at for faster filtering and sorting
+-- This improves query performance when admins filter by urgent status AND sort by timestamp
+-- Composite index is more efficient than single-column index for multi-column queries
+CREATE INDEX idx_complaints_urgent ON complaints(is_urgent, urgent_marked_at DESC);
 
 -- ================================================================
 -- VERIFICATION QUERIES (Run after migration to verify)

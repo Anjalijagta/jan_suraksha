@@ -2,8 +2,9 @@
 
 **Issue:** #137 - Add "Urgent Complaint" Flag  
 **Phase:** 1 of 3 (Database + Form UI)  
-**Date:** January 20, 2026  
-**Branch:** `feature/urgent-flag-phase1-137`
+**Date:** January 20-21, 2026  
+**Branch:** `feature/urgent-flag-phase1-137`  
+**PR:** #149
 
 ---
 
@@ -11,21 +12,34 @@
 
 This phase implements the foundational infrastructure for marking complaints as urgent, including database schema changes, form UI, client-side validation, and backend processing.
 
+## ✅ Code Review Fixes (Jan 21, 2026)
+
+All issues from Copilot AI and reviewer comments have been addressed:
+
+### Fixed Issues:
+1. ✅ **File Paths:** Moved all files to correct `jan_suraksha/` directory structure
+2. ✅ **Composite Index:** Changed from single-column to composite index `(is_urgent, urgent_marked_at DESC)`
+3. ✅ **Timestamp Logic:** Fixed `urgent_marked_at` - now NULL for non-urgent, timestamp only for urgent
+4. ✅ **Validation Order:** Urgent justification validation now occurs AFTER base complaint validation
+5. ✅ **Duplicate Code:** Removed duplicate file upload validation check
+6. ✅ **XSS Protection:** Proper sanitization with `htmlspecialchars()` for justification field
+7. ✅ **SQL Injection:** Using prepared statements with correct bind types
+
 ---
 
 ## ✅ What Was Implemented
 
 ### 1. Database Schema Changes
-**File:** `db/migration-urgent-flag-phase1.sql`
+**File:** `jan_suraksha/db/migration-urgent-flag-phase1.sql`
 
 Added three new columns to the `complaints` table:
 - `is_urgent` (TINYINT(1), DEFAULT 0) - Boolean flag for urgent complaints
 - `urgency_justification` (TEXT, DEFAULT NULL) - Required explanation when marked urgent
 - `urgent_marked_at` (TIMESTAMP, NULL) - Timestamp when complaint was marked urgent
-- Created index `idx_complaints_urgent` on `is_urgent` for query optimization
+- Created **composite index** `idx_complaints_urgent` on `(is_urgent, urgent_marked_at DESC)` for optimized filtering + sorting
 
 ### 2. Complaint Form UI
-**File:** `file-complaint.php` (Lines ~290-320)
+**File:** `jan_suraksha/file-complaint.php` (Lines ~235-275)
 
 Added urgent flag section with:
 - ⚠️ Warning icon and "Mark as Urgent" checkbox
@@ -35,7 +49,7 @@ Added urgent flag section with:
 - Minimum requirement indicator (10 characters)
 
 ### 3. JavaScript Functionality
-**File:** `file-complaint.php` (Lines ~370-430)
+**File:** `jan_suraksha/file-complaint.php` (Lines ~310-380)
 
 Implemented:
 - Toggle visibility of justification field based on checkbox state
@@ -45,7 +59,7 @@ Implemented:
 - Auto-clear justification field when checkbox unchecked
 
 ### 4. CSS Styling
-**File:** `css/style.css` (Lines ~240-390)
+**File:** `jan_suraksha/css/style.css` (Lines ~5-160)
 
 Added comprehensive styling:
 - Yellow/orange warning color scheme (#ffc107)
@@ -56,14 +70,14 @@ Added comprehensive styling:
 - Focus states for accessibility
 
 ### 5. Backend Processing
-**File:** `file-complaint.php` (Lines ~27-45, ~108-125)
+**File:** `jan_suraksha/file-complaint.php` (Lines ~25-50, ~85-105)
 
 Implemented:
-- POST data validation for urgent flag
+- POST data validation for urgent flag (AFTER base validation)
 - Server-side validation (min 10 chars, max 500 chars)
 - XSS protection using `htmlspecialchars()`
 - Updated SQL INSERT with prepared statement
-- Automatic `urgent_marked_at` timestamp (NOW())
+- **Conditional timestamp:** `urgent_marked_at` set to current timestamp ONLY if urgent, NULL otherwise
 - Backward compatibility (non-urgent complaints unaffected)
 
 ---
@@ -212,11 +226,12 @@ The following features are intentionally **NOT** included in Phase 1:
 
 | File | Lines Changed | Purpose |
 |------|--------------|---------|
-| `db/migration-urgent-flag-phase1.sql` | +48 (new) | Database schema changes |
-| `file-complaint.php` | ~85 lines | UI, JavaScript, backend processing |
-| `css/style.css` | ~150 lines | Urgent flag styling |
+| `jan_suraksha/db/migration-urgent-flag-phase1.sql` | +48 (new) | Database schema with composite index |
+| `jan_suraksha/file-complaint.php` | ~120 lines | UI, JavaScript, backend processing |
+| `jan_suraksha/css/style.css` | ~150 lines | Urgent flag styling |
+| `IMPLEMENTATION_NOTES.md` | Updated | Documentation with review fixes |
 
-**Total:** ~283 lines added (all well-commented)
+**Total:** ~318 lines added (all well-commented)
 
 ---
 
