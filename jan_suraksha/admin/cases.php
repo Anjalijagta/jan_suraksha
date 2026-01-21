@@ -15,7 +15,7 @@ $params = [];
 $types  = '';
 // Phase 2: Include urgent fields and sort urgent complaints first
 $sql = 'SELECT c.id, c.complaint_code, c.complainant_name, c.crime_type, c.status, c.is_anonymous, c.anonymous_tracking_id, 
-           c.is_urgent, c.urgency_justification, c.urgent_marked_at, c.created_at
+           c.is_urgent, c.urgent_marked_at, c.created_at
            FROM complaints c';
 
 if($q){ 
