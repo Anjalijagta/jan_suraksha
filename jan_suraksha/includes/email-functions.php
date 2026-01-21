@@ -310,11 +310,15 @@ function sendEmailViaNativeMail($to, $subject, $htmlBody, $textBody) {
         // Combine headers
         $headerString = implode("\r\n", $headers);
         
-        // Encode subject to handle special characters
-        $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
+        // Encode subject only if it contains non-ASCII characters
+        if (preg_match('/[^\x20-\x7E]/', $subject)) {
+            $finalSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
+        } else {
+            $finalSubject = $subject;
+        }
         
         // Send email
-        $sent = @mail($to, $encodedSubject, $htmlBody, $headerString);
+        $sent = @mail($to, $finalSubject, $htmlBody, $headerString);
         
         if ($sent) {
             return [
