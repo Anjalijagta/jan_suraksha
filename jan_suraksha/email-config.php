@@ -90,6 +90,10 @@ define('EMAIL_DEBUG', true);
 // IMPORTANT: Update this with your actual admin panel URL
 define('ADMIN_PANEL_BASE_URL', 'http://localhost/jan_suraksha/jan_suraksha/admin');
 
+// Warn if ADMIN_PANEL_BASE_URL is still using localhost, which will break links in production
+if (strpos(ADMIN_PANEL_BASE_URL, 'localhost') !== false) {
+    error_log('[Jan Suraksha] WARNING: ADMIN_PANEL_BASE_URL is set to a localhost URL (' . ADMIN_PANEL_BASE_URL . '). Update email-config.php with the correct admin panel URL before deploying to production.');
+}
 // Full URL pattern for viewing complaints
 // {ID} will be replaced with the actual complaint ID
 define('ADMIN_PANEL_URL', ADMIN_PANEL_BASE_URL . '/update-case.php?id={ID}');
