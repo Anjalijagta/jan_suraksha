@@ -12,16 +12,20 @@ $error_msg = '';
 
 // Handle Form Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $mysqli->begin_transaction();
-    try {
-        // 1. Update Case Status
-        $status = $_POST['status'];
-        $stmt1 = $mysqli->prepare("UPDATE complaints SET status = ? WHERE id = ?");
-        $stmt1->bind_param('si', $status, $complaint_id);
-        $stmt1->execute();
+    // CSRF Protection
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        $error_msg = 'Invalid security token. Please refresh the page and try again.';
+    } else {
+        $mysqli->begin_transaction();
+        try {
+            // 1. Update Case Status
+            $status = $_POST['status'];
+            $stmt1 = $mysqli->prepare("UPDATE complaints SET status = ? WHERE id = ?");
+            $stmt1->bind_param('si', $status, $complaint_id);
+            $stmt1->execute();
 
-        // 2. Add New Diary Entry
-        $diary_entry = trim($_POST['diary_entry'] ?? '');
+            // 2. Add New Diary Entry
+            $diary_entry = trim($_POST['diary_entry'] ?? '');
         if (!empty($diary_entry)) {
             $admin_id = (int)$_SESSION['admin_id'];
             // schema uses note_text and created_at
@@ -45,15 +49,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $existing_mugshot = $_POST['existing_mugshot'] ?? '';
             $new_mugshot = $existing_mugshot;
 
-            if (isset($_FILES['mugshot']) && $_FILES['mugshot']['error'] === UPLOAD_ERR_OK) {
-                $file = $_FILES['mugshot'];
-                if ($file['size'] < 5 * 1024 * 1024 && in_array($file['type'], ['image/jpeg', 'image/png'])) {
-                    $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-                    $new_mugshot = bin2hex(random_bytes(16)) . '.' . $ext;
-                    if (!move_uploaded_file($file['tmp_name'], __DIR__ . '/../uploads/mugshots/' . $new_mugshot)) {
-                        throw new Exception("Failed to move uploaded mugshot file.");
+            // Handle mugshot upload with strict MIME + extension checks
+            if (isset($_FILES['mugshot']) && $_FILES['mugshot']['error'] !== UPLOAD_ERR_NO_FILE) {
+                $mugshotFile = $_FILES['mugshot'];
+
+                $allowedMugshotTypes = [
+                    'jpg'  => ['image/jpeg', 'image/pjpeg'],
+                    'jpeg' => ['image/jpeg', 'image/pjpeg'],
+                    'png'  => ['image/png'],
+                ];
+
+                $maxMugshotSize = 5 * 1024 * 1024; // 5MB
+                $uploadError = null;
+                $destDir = __DIR__ . '/../uploads/mugshots';
+
+                $storedName = js_secure_upload($mugshotFile, $allowedMugshotTypes, $destDir, $maxMugshotSize, $uploadError, 'mugshot');
+
+                if ($uploadError !== null) {
+                    throw new Exception($uploadError . ' Mugshots must be JPG or PNG under 5MB.');
+                }
+
+                $new_mugshot = $storedName;
+
+                if (!empty($existing_mugshot) && $existing_mugshot !== $new_mugshot) {
+                    $oldMugshotPath = $destDir . DIRECTORY_SEPARATOR . basename($existing_mugshot);
+                    if (is_file($oldMugshotPath)) {
+                        @unlink($oldMugshotPath);
                     }
-                } else { throw new Exception("Invalid mugshot file. Must be JPG/PNG and under 5MB."); }
+                }
             }
 
             if ($accused_id > 0) {
@@ -74,12 +97,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         $mysqli->commit();
+        // Regenerate CSRF token after successful update
+        unset($_SESSION['csrf_token']);
         header("Location: update-case.php?id=" . $complaint_id . "&success=1");
         exit;
 
     } catch (Exception $e) {
         $mysqli->rollback();
         $error_msg = "Error updating case: " . $e->getMessage();
+    }
     }
 }
 
@@ -98,6 +124,9 @@ $stmt->execute();
 $case = $stmt->get_result()->fetch_assoc();
 
 if (!$case) { die("Error: Case not found."); }
+
+// Set display code for anonymous or regular complaint
+$case['accused_id'] = $case['criminal_id'] ?? 0;
 
 $diary_entries = $mysqli->query("SELECT * FROM case_diary WHERE complaint_id = $complaint_id ORDER BY created_at DESC");
 
@@ -186,6 +215,7 @@ $current_page = 'cases.php'; // CORRECTED
             <?php if ($error_msg): ?><div class="alert alert-danger"><?= $error_msg ?></div><?php endif; ?>
 
             <form method="post" enctype="multipart/form-data">
+                <?php echo csrf_token_field(); ?>
                 <input type="hidden" name="accused_id" value="<?= e($case['accused_id']) ?>">
                 <input type="hidden" name="existing_mugshot" value="<?= e($case['mugshot']) ?>">
 
@@ -193,11 +223,38 @@ $current_page = 'cases.php'; // CORRECTED
                     <!-- Left Column -->
                     <div class="col-lg-7">
                         <div class="card p-3 mb-4">
-                            <h5 class="mb-3">Case Information</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">Case Information</h5>
+                                <?php if($case['is_anonymous'] == 1): ?>
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-shield-lock"></i> Anonymous
+                                    </span>
+                                <?php endif; ?>
+                            </div>
                             <div class="info-grid">
-                                <div class="info-label">FIR No:</div><div><?= e($case['complaint_code']) ?></div>
+                                <div class="info-label">
+                                    <?= $case['is_anonymous'] == 1 ? 'Tracking ID:' : 'FIR No:' ?>
+                                </div>
+                                <div>
+                                    <?php 
+                                    if($case['is_anonymous'] == 1 && !empty($case['anonymous_tracking_id'])) {
+                                        echo e($case['anonymous_tracking_id']);
+                                    } else {
+                                        echo e($case['complaint_code']);
+                                    }
+                                    ?>
+                                </div>
                                 <div class="info-label">Date of Incident:</div><div><?= date('Y-m-d', strtotime($case['date_filed'])) ?></div>
-                                <div class="info-label">Complainant:</div><div><?= e($case['complainant_name']) ?></div>
+                                <div class="info-label">Complainant:</div>
+                                <div>
+                                    <?php 
+                                    if($case['is_anonymous'] == 1) {
+                                        echo '<span class="text-muted fst-italic"><i class="bi bi-lock-fill"></i> Protected (Anonymous)</span>';
+                                    } else {
+                                        echo e($case['complainant_name']);
+                                    }
+                                    ?>
+                                </div>
                             </div>
                         </div>
 

@@ -1,0 +1,532 @@
+/**
+ * Print Receipt Stylesheet for Jan Suraksha
+ * Provides professional, printer-friendly receipt formatting
+ * with government document styling
+ */
+
+/* ============================================
+   SCREEN STYLES (Display on Web)
+   ============================================ */
+
+.receipt-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 2rem;
+    font-family: Arial, sans-serif;
+}
+
+.receipt-header {
+    text-align: center;
+    border-bottom: 3px solid #0d6efd;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.receipt-logo {
+    max-width: 80px;
+    margin-bottom: 1rem;
+}
+
+.receipt-header h1 {
+    color: #0d6efd;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.receipt-header .tagline {
+    color: #6c757d;
+    font-size: 0.95rem;
+    font-style: italic;
+}
+
+.receipt-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: #f8f9fa;
+}
+
+.receipt-section h2 {
+    color: #0d6efd;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #0d6efd;
+    padding-bottom: 0.5rem;
+}
+
+.tracking-id-box {
+    background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    margin: 1.5rem 0;
+    box-shadow: 0 4px 6px rgba(13, 110, 253, 0.3);
+}
+
+.tracking-id-box h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 400;
+}
+
+.tracking-id-display {
+    font-size: 2rem;
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    letter-spacing: 3px;
+    background-color: rgba(255,255,255,0.2);
+    padding: 1rem;
+    border-radius: 6px;
+    margin: 0.5rem 0;
+    word-break: break-all;
+}
+
+.receipt-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.detail-item {
+    padding: 0.75rem;
+    background: white;
+    border-radius: 4px;
+    border-left: 4px solid #0d6efd;
+}
+
+.detail-item .label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.detail-item .value {
+    color: #212529;
+    font-size: 1rem;
+    word-wrap: break-word;
+}
+
+.qr-code-container {
+    text-align: center;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+}
+
+.qr-code-container img,
+.qr-code-container canvas {
+    max-width: 150px;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+}
+
+.qr-code-container p {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.receipt-footer {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #dee2e6;
+    text-align: center;
+}
+
+.receipt-footer .disclaimer {
+    font-size: 0.85rem;
+    color: #6c757d;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.receipt-footer .important-notes {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: left;
+    margin-top: 1rem;
+}
+
+.receipt-footer .important-notes h4 {
+    color: #856404;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.receipt-footer .important-notes ul {
+    margin: 0;
+    padding-left: 1.5rem;
+    color: #856404;
+    font-size: 0.9rem;
+}
+
+.print-timestamp {
+    font-size: 0.8rem;
+    color: #adb5bd;
+    margin-top: 1rem;
+}
+
+/* Print Button Styling */
+.print-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0.5rem;
+    text-decoration: none;
+}
+
+.print-btn:hover {
+    background-color: #0b5ed7;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+    color: white;
+}
+
+.print-btn i {
+    margin-right: 0.5rem;
+}
+
+/* ============================================
+   PRINT STYLES (@media print)
+   ============================================ */
+
+@media print {
+    /* Page Setup */
+    @page {
+        size: A4 portrait;
+        margin: 12.7mm; /* Fallback for browsers preferring metric units */
+        margin: 0.5in;  /* Primary setting for browsers supporting inch units */
+    }
+
+    /* Reset body and hide unnecessary elements */
+    body {
+        background: white !important;
+        color: black !important;
+        font-size: 12pt;
+        line-height: 1.4;
+    }
+
+    /* Hide all non-essential elements */
+    header,
+    .header,
+    nav,
+    .navbar,
+    footer,
+    .footer,
+    .sidebar,
+    .btn:not(.print-btn),
+    button:not(.print-btn),
+    .action-buttons,
+    .copy-btn,
+    .alert,
+    .warning-box,
+    form,
+    input,
+    select,
+    textarea,
+    .social-icons,
+    .advertisement,
+    .theme-toggle,
+    .no-print,
+    #theme-toggle,
+    .back-to-top {
+        display: none !important;
+    }
+
+    /* Hide the print button itself when printing */
+    .print-btn {
+        display: none !important;
+    }
+
+    /* Force visible and proper formatting for receipt */
+    .receipt-container {
+        display: block !important;
+        visibility: visible !important;
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        page-break-inside: avoid;
+    }
+
+    /* Receipt Header */
+    .receipt-header {
+        border-bottom: 3px solid #000;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        page-break-after: avoid;
+    }
+
+    .receipt-header h1 {
+        color: #000 !important;
+        font-size: 20pt;
+        font-weight: bold;
+    }
+
+    .receipt-header .tagline {
+        color: #333 !important;
+        font-size: 11pt;
+    }
+
+    .receipt-logo {
+        max-width: 60px;
+        height: auto;
+    }
+
+    /* Tracking ID Box - Print-friendly colors */
+    .tracking-id-box {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+        border: 2px solid #000 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+    }
+
+    .tracking-id-box h3 {
+        color: #000 !important;
+    }
+
+    .tracking-id-display {
+        background: white !important;
+        color: #000 !important;
+        border: 2px dashed #000 !important;
+        font-size: 16pt;
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
+
+    /* Receipt Sections */
+    .receipt-section {
+        background: white !important;
+        border: 1px solid #000 !important;
+        border-radius: 0 !important;
+        margin-bottom: 1rem;
+        page-break-inside: avoid;
+    }
+
+    .receipt-section h2 {
+        color: #000 !important;
+        font-size: 14pt;
+        border-bottom: 2px solid #000 !important;
+    }
+
+    /* Detail Items */
+    .receipt-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .detail-item {
+        background: white !important;
+        border: 1px solid #ccc !important;
+        border-left: 4px solid #000 !important;
+        page-break-inside: avoid;
+    }
+
+    .detail-item .label {
+        color: #000 !important;
+        font-weight: bold;
+    }
+
+    .detail-item .value {
+        color: #000 !important;
+    }
+
+    /* QR Code */
+    .qr-code-container {
+        background: white !important;
+        text-align: center;
+        page-break-inside: avoid;
+    }
+
+    .qr-code-container img,
+    .qr-code-container canvas {
+        max-width: 120px;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .qr-code-container p {
+        color: #000 !important;
+        font-size: 10pt;
+    }
+
+    /* Receipt Footer */
+    .receipt-footer {
+        border-top: 2px solid #000;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        page-break-inside: avoid;
+    }
+
+    .receipt-footer .disclaimer {
+        color: #333 !important;
+        font-size: 10pt;
+    }
+
+    .receipt-footer .important-notes {
+        background: white !important;
+        border: 2px solid #000 !important;
+        color: #000 !important;
+    }
+
+    .receipt-footer .important-notes h4 {
+        color: #000 !important;
+    }
+
+    .receipt-footer .important-notes ul {
+        color: #000 !important;
+    }
+
+    .print-timestamp {
+        color: #666 !important;
+        font-size: 9pt;
+    }
+
+    /* Typography for print */
+    h1, h2, h3, h4, h5, h6 {
+        color: #000;
+    }
+
+    p, li, span, div {
+        color: #000;
+    }
+
+    /* Remove background images and colors within the receipt */
+    .receipt-container,
+    .receipt-container * {
+        background-image: none !important;
+        text-shadow: none !important;
+    }
+
+    /* Page break control */
+    h2, h3 {
+        page-break-after: avoid;
+    }
+
+    table, figure, img {
+        page-break-inside: avoid;
+    }
+
+    /* Ensure good contrast */
+    a {
+        color: #000 !important;
+        text-decoration: underline;
+    }
+
+    /* Orphans and widows control for better typography */
+    p {
+        orphans: 3;
+        widows: 3;
+    }
+
+    /* Force black text on white background globally */
+    body, .receipt-container, .receipt-section, .detail-item {
+        background: white !important;
+        color: black !important;
+    }
+
+    /* Hide anything with .no-print class */
+    .no-print,
+    [class*="no-print"] {
+        display: none !important;
+    }
+}
+
+/* ============================================
+   RESPONSIVE STYLES
+   ============================================ */
+
+@media screen and (max-width: 768px) {
+    .receipt-container {
+        padding: 1rem;
+    }
+
+    .receipt-details {
+        grid-template-columns: 1fr;
+    }
+
+    .tracking-id-display {
+        font-size: 1.25rem;
+        letter-spacing: 1px;
+    }
+
+    .receipt-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .detail-item .label {
+        font-size: 0.75rem;
+    }
+
+    .detail-item .value {
+        font-size: 0.9rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .receipt-container {
+        padding: 0.75rem;
+        margin: 1rem;
+    }
+
+    .tracking-id-display {
+        font-size: 1rem;
+        padding: 0.75rem;
+    }
+
+    .print-btn {
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .print-btn {
+        transition: none;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .receipt-section {
+        border: 2px solid currentColor;
+    }
+
+    .tracking-id-box {
+        border: 2px solid currentColor;
+    }
+}

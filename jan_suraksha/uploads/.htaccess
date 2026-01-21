@@ -1,0 +1,19 @@
+# Security hardening for uploaded files
+# Prevent execution of PHP and other script-like files in this directory
+
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|php8|phar|phps|pl|py|cgi|sh|bash|exe)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Disable PHP engine if mod_php is used
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+
+# Extra safeguard: do not treat these as executable scripts even if reached
+AddType text/plain .php .phtml .php3 .php4 .php5 .php7 .php8 .phar .phps

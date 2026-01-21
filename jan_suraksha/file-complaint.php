@@ -3,12 +3,19 @@ require_once __DIR__ . '/config.php';
 
 $err = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $user_id = $_SESSION['user_id'] ?? null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') 
+    // CSRF Protection
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        $err = 'Invalid security token. Please refresh the page and try again.';
+    } else {
+        $user_id = $_SESSION['user_id'] ?? null;
 
-    if (empty($user_id)) {
-        $err = 'Please login before filing a complaint.';
-    }
+        if (empty($user_id)) {
+            $err = 'Please login before filing a complaint.';
+        }
+
+    // Check if this is an anonymous complaint
+    $isAnonymous = isset($_POST['is_anonymous']) && $_POST['is_anonymous'] == '1';
 
     $name = trim($_POST['name'] ?? '');
     $mobile = trim($_POST['mobile'] ?? '');
@@ -43,25 +50,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $u = $_FILES['evidence'];
             $allowed = ['image/jpeg', 'image/png', 'application/pdf', 'video/mp4'];
 
-            if (!in_array($u['type'], $allowed)) {
-                $err = 'Unsupported file type. Allowed: JPG, PNG, PDF, MP4';
-            } elseif ($u['size'] > 20 * 1024 * 1024) {
-                $err = 'File too large. Maximum 20MB.';
+            if (!empty($_FILES['evidence']) && $_FILES['evidence']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $evidenceFile = $_FILES['evidence'];
+
+            // Strict allow-list: images + selected document/media types
+            $allowedEvidenceTypes = [
+                'jpg'  => ['image/jpeg', 'image/pjpeg'],
+                'jpeg' => ['image/jpeg', 'image/pjpeg'],
+                'png'  => ['image/png'],
+                'pdf'  => ['application/pdf'],
+                'mp4'  => ['video/mp4', 'video/x-m4v'],
+            ];
+
+            $maxEvidenceSize = 20 * 1024 * 1024; // 20MB
+            $uploadError = null;
+            $destDir = __DIR__ . '/uploads';
+
+            $storedName = js_secure_upload($evidenceFile, $allowedEvidenceTypes, $destDir, $maxEvidenceSize, $uploadError, 'evidence');
+
+            if ($uploadError !== null) {
+                $err = $uploadError . ' Allowed types: JPG, JPEG, PNG, PDF, MP4.';
             } else {
-                $ext = pathinfo($u['name'], PATHINFO_EXTENSION);
-                $safe = bin2hex(random_bytes(16)) . '.' . $ext;
-                $destDir = __DIR__ . '/uploads';
-
-                if (!is_dir($destDir)) {
-                    mkdir($destDir, 0755, true);
-                }
-
-                $dest = $destDir . '/' . $safe;
-                if (move_uploaded_file($u['tmp_name'], $dest)) {
-                    $uploadedFile = $safe;
-                } else {
-                    $err = 'Failed to upload file.';
-                }
+                $uploadedFile = $storedName;
             }
         }
 
@@ -70,10 +80,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $prefix = 'IN/' . date('Y') . '/';
             $code = $prefix . str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT);
 
-            // Combine address fields
-            $complainantAddress = trim("$house, $city, $state - $pincode");
-            if ($complainantAddress === ',  -') {
-                $complainantAddress = '';
+            // Generate anonymous tracking ID if this is an anonymous complaint
+            $anonymousTrackingId = null;
+            if ($isAnonymous) {
+                // Format: ANON-YYYY-XXXXXX (6 random hex characters)
+                $anonymousTrackingId = 'ANON-' . date('Y') . '-' . strtoupper(bin2hex(random_bytes(3)));
+            }
+
+            // Combine address fields (only for regular complaints)
+            $complainantAddress = '';
+            if (!$isAnonymous) {
+                $complainantAddress = trim("$house, $city, $state - $pincode");
+                if ($complainantAddress === ',  -') {
+                    $complainantAddress = '';
+                }
             }
 
             // Prepend address to description
@@ -101,7 +121,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bind_param('issssssssiiss', $uid, $code, $name, $mobile, $crime, $date, $location, $finalDescription, $uploadedFile, $status, $urgentFlag, $sanitizedJustification, $urgentTimestamp);
 
                 if ($stmt->execute()) {
-                    header('Location: complain-success.php?code=' . urlencode($code));
+                    // Redirect to appropriate success page
+                    if ($isAnonymous) {
+                        header('Location: anonymous-success.php?tracking_id=' . urlencode($anonymousTrackingId));
+                    } else {
+                        header('Location: complain-success.php?code=' . urlencode($code));
+                    }
                     exit;
                 } else {
                     $err = 'Error filing complaint: ' . $stmt->error;
@@ -112,6 +137,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <?php include 'header.php'; ?>
+
+<link rel="stylesheet" href="css/anonymous.css">
 
 <style>
     .form-container {
@@ -198,8 +225,36 @@ body {
                 <?php endif; ?>
 
                 <form method="post" enctype="multipart/form-data" id="complaintForm">
+                    <?php echo csrf_token_field(); ?>
                     
-                    <section class="mb-4">
+                    <!-- Anonymous Reporting Option -->
+                    <section class="mb-4 p-3" style="background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="anonymous-checkbox" name="is_anonymous" value="1">
+                            <label class="form-check-label" for="anonymous-checkbox">
+                                <strong>🔒 Report Anonymously</strong>
+                                <p class="text-muted small mb-0">Your identity will be protected. Personal information fields will be hidden.</p>
+                            </label>
+                        </div>
+                        
+                        <!-- Privacy Disclaimer (Hidden by default, shown when anonymous is checked) -->
+                        <div id="anonymous-disclaimer" class="alert alert-info mt-3" style="display: none; border-left: 4px solid #0dcaf0;">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-info-circle-fill me-2 mt-1" style="font-size: 1.25rem;"></i>
+                                <div>
+                                    <h6 class="mb-2"><strong>⚠️ Important: Anonymous Reporting</strong></h6>
+                                    <ul class="mb-0 small">
+                                        <li>Your identity will be completely protected</li>
+                                        <li><strong>Save your tracking ID securely</strong> - you cannot recover it later</li>
+                                        <li>Anonymous complaints may take longer to investigate</li>
+                                        <li>No personal information will be stored in our system</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <section class="mb-4" id="personal-info-section">
                         <h2 class="form-section-heading">Complainant Details</h2>
                         <div class="mb-3">
                             <label for="name" class="form-label">Complainant's Name</label>
@@ -408,5 +463,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<script src="js/anonymous-handler.js"></script>
 
 <?php include 'footer.php'; ?>

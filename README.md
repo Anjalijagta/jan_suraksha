@@ -147,6 +147,24 @@ You need a local server environment to run PHP and MySQL.
       * Open your browser.
       * Go to: `http://localhost/jan_suraksha/jan_suraksha`
 
+
+## Additional Notes (using Docker):
+
+In case you're you want to use docker to run mysql instance.
+
+```shell
+    docker-compose up db -d
+```
+
+## Update values in the `config.php` file.
+
+```shell
+    $db_host = '127.0.0.1';
+    $db_user = 'root';
+    $db_pass = 'root';
+    $db_name = 'jan_suraksha';
+```
+
 -----
 
 ## 🤝 Contribution Guidelines 

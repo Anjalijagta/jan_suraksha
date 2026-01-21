@@ -8,6 +8,10 @@ require_once __DIR__ . '/config.php';
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Jan Suraksha - Aapki Suraksha, Hamari Zimmedari</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="shortcut icon" href="logo.png" type="image/png">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
@@ -414,6 +418,81 @@ require_once __DIR__ . '/config.php';
             font-weight: 700;
         }
 
+
+        /* Custom Dropdown Styling */
+        .nav-item.dropdown .dropdown-toggle {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .nav-item.dropdown .dropdown-toggle::after {
+            transition: transform 0.3s ease;
+            display: inline-block;
+            margin-left: 0.3em;
+        }
+
+        .nav-item.dropdown.show .dropdown-toggle::after {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 30px var(--color-shadow);
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            min-width: 220px;
+            animation: dropdownFadeIn 0.3s ease;
+        }
+
+        @keyframes dropdownFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            color: var(--color-text);
+            padding: 0.65rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item i {
+            font-size: 1.1rem;
+            color: var(--color-primary);
+            transition: transform 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--color-primary-soft);
+            color: var(--color-primary);
+            transform: translateX(5px);
+        }
+
+        .dropdown-item:hover i {
+            transform: scale(1.15);
+        }
+
+        .dropdown-item.active {
+            background-color: var(--color-primary);
+            color: #ffffff;
+        }
+
+        .dropdown-item.active i {
+            color: #ffffff;
+        }
         /* Dark theme overrides for navbar-main - MUCH DARKER */
         [data-theme="dark"] .navbar-main {
             background-color: #0a0e17 !important;
@@ -437,6 +516,29 @@ require_once __DIR__ . '/config.php';
         [data-theme="dark"] .top-bar {
             background-color: #0d1117 !important;
             border-bottom-color: var(--color-border);
+
+        [data-theme="dark"] .dropdown-menu {
+            background-color: var(--color-surface) !important;
+            border-color: var(--color-border) !important;
+        }
+
+        [data-theme="dark"] .dropdown-item {
+            color: var(--color-text) !important;
+        }
+
+        [data-theme="dark"] .dropdown-item:hover {
+            background-color: var(--color-surface-soft) !important;
+            color: var(--color-primary) !important;
+        }
+
+        [data-theme="dark"] .dropdown-item.active {
+            background-color: var(--color-primary) !important;
+            color: #000000 !important;
+        }
+
+        [data-theme="dark"] .dropdown-item.active i {
+            color: #000000 !important;
+        }
         }
 
         @media (max-width: 991.98px) {
@@ -494,7 +596,7 @@ require_once __DIR__ . '/config.php';
             justify-content: center;
         }
 
-*** End Patch        /* NAVBAR base (for blur effect on scroll if needed) */
+        /* NAVBAR base (for blur effect on scroll if needed) */
         .navbar {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(12px);
@@ -896,30 +998,13 @@ require_once __DIR__ . '/config.php';
             color: var(--color-text) !important;
         }
 
-        /* Navbar light theme blur fix */
-        [data-theme="light"] .navbar {
-            background: rgba(255, 255, 255, 0.95) !important;
-        }
-
-        /* Remove extra separators/gaps so hero/banner sits flush with nav */
-        header.border-bottom {
-            border-bottom: 0 !important;
-        }
-
-        .navbar-main {
-            border-bottom: 0 !important;
-            box-shadow: none !important;
-            margin-bottom: 0 !important;
-        }
-
-        .top-bar {
-            margin-bottom: 0 !important;
-        }
-
-        .hero-section {
-            margin-top: 0 !important;
-            padding-top: 12px; /* small padding to avoid touching exactly if desired */
-        }
+        /* NOTE:
+         * Duplicate navbar/layout rules (background, borders, top-bar spacing,
+         * and hero-section offsets) that previously appeared here have been
+         * removed because the same selectors are already defined earlier
+         * in this stylesheet. Keeping a single canonical definition reduces
+         * CSS duplication and avoids conflicting overrides.
+         */
     </style>
 </head>
 <body data-theme="light">
@@ -997,20 +1082,61 @@ require_once __DIR__ . '/config.php';
               <i class="bi bi-info-circle-fill me-1"></i> About Us
             </a>
           </li>
-          <li class="nav-item">
+<li class="nav-item">
             <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'blog.php' ? 'active' : ''; ?>" href="blog.php">
               <i class="bi bi-journal-text me-1"></i> Blog
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'feedback.php' ? 'active' : ''; ?>" href="feedback.php">
-              <i class="bi bi-chat-dots-fill me-1"></i> Feedback
+            <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'help.php' ? 'active' : ''; ?>" href="help.php">
+              <i class="bi bi-chat-dots-fill me-1"></i> Help
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'faq.php' ? 'active' : ''; ?>" href="faq.php">
-              <i class="bi bi-question-circle-fill me-1"></i> FAQ
+            <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'contributors.php' ? 'active' : ''; ?>" href="contributors.php">
+              <i class="bi bi-chat-dots-fill me-1"></i> Contributors
             </a>
+          </li>
+          
+          <!-- More Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle <?php 
+              $morePages = ['faq.php', 'gallery.php', 'contact.php', 'feedback.php'];
+              echo in_array(basename($_SERVER['PHP_SELF']), $morePages) ? 'active' : ''; 
+            ?>" 
+               href="#" 
+               id="moreDropdown" 
+               role="button" 
+               data-bs-toggle="dropdown" 
+               aria-expanded="false">
+              <i class="bi bi-grid-3x3-gap-fill me-1"></i> More
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="moreDropdown">
+              <li>
+                <a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) === 'faq.php' ? 'active' : ''; ?>" href="faq.php">
+                  <i class="bi bi-question-circle-fill"></i>
+                  <span>FAQ</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) === 'gallery.php' ? 'active' : ''; ?>" href="gallery.php">
+                  <i class="bi bi-images"></i>
+                  <span>Gallery</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) === 'contact.php' ? 'active' : ''; ?>" href="contact.php">
+                  <i class="bi bi-telephone-fill"></i>
+                  <span>Contact</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) === 'feedback.php' ? 'active' : ''; ?>" href="feedback.php">
+                  <i class="bi bi-chat-dots-fill"></i>
+                  <span>Feedback</span>
+                </a>
+              </li>
+            </ul>
           </li>
         </ul>
 
@@ -1118,6 +1244,22 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentTheme === 'system') {
             setTheme(e.matches ? 'dark' : 'light');
         }
+    });
+
+    // Smooth dropdown animations
+    const dropdowns = document.querySelectorAll('.dropdown');
+    dropdowns.forEach(dropdown => {
+        dropdown.addEventListener('show.bs.dropdown', function() {
+            const menu = this.querySelector('.dropdown-menu');
+            menu.style.display = 'block';
+            setTimeout(() => menu.classList.add('show'), 10);
+        });
+        
+        dropdown.addEventListener('hide.bs.dropdown', function() {
+            const menu = this.querySelector('.dropdown-menu');
+            menu.classList.remove('show');
+            setTimeout(() => menu.style.display = 'none', 300);
+        });
     });
 });
 

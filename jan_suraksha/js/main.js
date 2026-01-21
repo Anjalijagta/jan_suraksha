@@ -378,8 +378,252 @@ function initLoginValidation() {
     });
 }
 
+// ===== LOADING ANIMATIONS =====
+
+// Loading Overlay Functions
+const LoadingOverlay = {
+    show: function() {
+        let overlay = document.getElementById('loadingOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'loadingOverlay';
+            overlay.className = 'loading-overlay';
+            overlay.setAttribute('role', 'status');
+            overlay.setAttribute('aria-live', 'polite');
+            overlay.setAttribute('aria-label', 'Loading');
+            overlay.innerHTML = '<div class="spinner"></div>';
+            document.body.appendChild(overlay);
+        }
+        setTimeout(() => overlay.classList.add('active'), 10);
+    },
+    
+    hide: function() {
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.remove(), 300);
+        }
+    }
+};
+
+// Form Loading State
+function addFormLoading(form) {
+    if (form) {
+        form.classList.add('form-loading');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.classList.add('btn-loading');
+            submitBtn.disabled = true;
+        }
+    }
+}
+
+function removeFormLoading(form) {
+    if (form) {
+        form.classList.remove('form-loading');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.classList.remove('btn-loading');
+            submitBtn.disabled = false;
+        }
+    }
+}
+
+// Show loading on form submissions
+function initFormLoadingHandlers() {
+    // Login Form
+    const loginForm = document.querySelector('form[action*="login"]');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            const email = this.querySelector('input[name="id"]');
+            const password = this.querySelector('input[name="password"]');
+            
+            if (email && password && email.value && password.value) {
+                addFormLoading(this);
+                LoadingOverlay.show();
+            }
+        });
+    }
+    
+    // Complaint Form
+    const complaintForm = document.querySelector('form[action*="file-complaint"]');
+    if (complaintForm) {
+        complaintForm.addEventListener('submit', function(e) {
+            const requiredFields = this.querySelectorAll('[required]');
+            let allFilled = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value) allFilled = false;
+            });
+            
+            if (allFilled) {
+                addFormLoading(this);
+                LoadingOverlay.show();
+            }
+        });
+    }
+    
+    // Feedback Form
+    const feedbackForm = document.querySelector('form[action*="feedback"]');
+    if (feedbackForm) {
+        feedbackForm.addEventListener('submit', function(e) {
+            const subject = this.querySelector('[name="subject"]');
+            const message = this.querySelector('[name="message"]');
+            
+            if (subject && message && subject.value && message.value) {
+                addFormLoading(this);
+                LoadingOverlay.show();
+            }
+        });
+    }
+    
+    // Register Form
+    const registerForm = document.querySelector('form[action*="register"]');
+    if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            const requiredFields = this.querySelectorAll('[required]');
+            let allFilled = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value) allFilled = false;
+            });
+            
+            if (allFilled) {
+                addFormLoading(this);
+                LoadingOverlay.show();
+            }
+        });
+    }
+}
+
+// Skeleton Loader Functions
+function showSkeletonLoader(container, type = 'card') {
+    if (!container) return;
+    
+    container.classList.add('skeleton-container');
+    container.setAttribute('aria-label', 'Loading content');
+    container.setAttribute('aria-busy', 'true');
+    
+    if (type === 'card') {
+        container.innerHTML = `
+            <div class="skeleton skeleton-card"></div>
+            <div class="skeleton skeleton-card"></div>
+            <div class="skeleton skeleton-card"></div>
+        `;
+    } else if (type === 'table') {
+        container.innerHTML = `
+            <div class="skeleton skeleton-table-row"></div>
+            <div class="skeleton skeleton-table-row"></div>
+            <div class="skeleton skeleton-table-row"></div>
+            <div class="skeleton skeleton-table-row"></div>
+            <div class="skeleton skeleton-table-row"></div>
+        `;
+    } else if (type === 'gallery') {
+        container.innerHTML = `
+            <div class="skeleton-gallery-grid">
+                <div class="skeleton skeleton-gallery-item"></div>
+                <div class="skeleton skeleton-gallery-item"></div>
+                <div class="skeleton skeleton-gallery-item"></div>
+                <div class="skeleton skeleton-gallery-item"></div>
+                <div class="skeleton skeleton-gallery-item"></div>
+                <div class="skeleton skeleton-gallery-item"></div>
+            </div>
+        `;
+    } else if (type === 'text') {
+        container.innerHTML = `
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text"></div>
+        `;
+    }
+}
+
+function hideSkeletonLoader(container, content) {
+    if (!container) return;
+    
+    container.classList.remove('skeleton-container');
+    if (content) {
+        container.innerHTML = content;
+    }
+    container.classList.add('fade-in');
+}
+
+// Progress Bar
+function showProgressBar() {
+    let progressContainer = document.getElementById('progressBarContainer');
+    if (!progressContainer) {
+        progressContainer = document.createElement('div');
+        progressContainer.id = 'progressBarContainer';
+        progressContainer.className = 'progress-bar-container';
+        progressContainer.innerHTML = '<div class="progress-bar"></div>';
+        document.body.appendChild(progressContainer);
+    }
+    progressContainer.classList.add('active');
+    
+    setTimeout(() => {
+        progressContainer.classList.remove('active');
+        setTimeout(() => progressContainer.remove(), 300);
+    }, 2000);
+}
+
+// Page transition loading
+function initPageTransitions() {
+    // Show progress bar on navigation using event delegation
+    const handlerTarget = document.body || document;
+
+    handlerTarget.addEventListener('click', function (e) {
+        const link = e.target.closest('a');
+        if (!link) {
+            return;
+        }
+
+        const href = link.getAttribute('href');
+
+        // Ignore in-page anchors and javascript: links
+        if (!href || href.startsWith('#') || href.startsWith('javascript:')) {
+            return;
+        }
+
+        // Ignore downloads and links that open in a new tab/window or frame
+        if (link.hasAttribute('download') || link.hasAttribute('target')) {
+            return;
+        }
+
+        showProgressBar();
+    });
+}
+
+// AJAX Loading Helper
+function toggleElementLoading(element, show = true) {
+    if (!element) return;
+    
+    if (show) {
+        element.classList.add('loading');
+    } else {
+        element.classList.remove('loading');
+    }
+}
+
 // Initialize validation when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     initRegisterValidation();
     initLoginValidation();
+    initFormLoadingHandlers();
+    initPageTransitions();
+    
+    // Hide loading overlay once the full page has finished loading
+    window.addEventListener('load', function () {
+        if (window.LoadingOverlay && typeof window.LoadingOverlay.hide === 'function') {
+            window.LoadingOverlay.hide();
+        }
+    });
 });
+
+// Export functions for use in other scripts
+window.LoadingOverlay = LoadingOverlay;
+window.showSkeletonLoader = showSkeletonLoader;
+window.hideSkeletonLoader = hideSkeletonLoader;
+window.toggleElementLoading = toggleElementLoading;
+window.showProgressBar = showProgressBar;
+

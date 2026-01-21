@@ -3,16 +3,27 @@ require_once __DIR__ . '/../config.php';
 
 $err='';
 if($_SERVER['REQUEST_METHOD']==='POST'){
-    $aid = $_POST['admin_id'] ?? '';
-    $pass = $_POST['password'] ?? '';
-    $stmt = $mysqli->prepare('SELECT id,admin_name,password_hash FROM admins WHERE admin_id=?');
-    $stmt->bind_param('s',$aid); $stmt->execute(); $res = $stmt->get_result();
-    if($row = $res->fetch_assoc()){
-        if(password_verify($pass,$row['password_hash'])){
-            $_SESSION['admin_id'] = $row['id']; header('Location: dashboard.php'); exit;
+    // CSRF Protection
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        $err = 'Invalid security token. Please try again.';
+    } else {
+        $aid = $_POST['admin_id'] ?? '';
+        $pass = $_POST['password'] ?? '';
+        $stmt = $mysqli->prepare('SELECT id,admin_name,password_hash FROM admins WHERE admin_id=?');
+        $stmt->bind_param('s',$aid); $stmt->execute(); $res = $stmt->get_result();
+        if($row = $res->fetch_assoc()){
+            if(password_verify($pass,$row['password_hash'])){
+                // Session Fixation Protection - Regenerate session ID
+                session_regenerate_id(true);
+                $_SESSION['admin_id'] = $row['id'];
+                $_SESSION['admin_name'] = $row['admin_name'];
+                // Regenerate CSRF token after successful login
+                unset($_SESSION['csrf_token']);
+                header('Location: dashboard.php'); exit;
+            }
         }
+        $err = 'Invalid admin credentials.';
     }
-    $err = 'Invalid admin credentials.';
 }
 ?>
 <!doctype html>
@@ -142,13 +153,50 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
       color: #111827;
     }
 
+    .back-home {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .back-home:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      transform: translateX(-2px);
+    }
+
+    .back-home i {
+      font-size: 1.1rem;
+    }
+
     @media (max-width: 576px) {
       .auth-header { padding: 2rem 1.5rem; }
       .auth-body   { padding: 2rem 1.5rem; }
+      .back-home {
+        top: 10px;
+        left: 10px;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
 <body>
+<a href="../index.php" class="back-home">
+  <i class="bi bi-arrow-left"></i> Back to Home
+</a>
 <div class="admin-container">
   <div class="auth-card">
     <div class="auth-header">
@@ -161,6 +209,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
       <?php endif; ?>
 
       <form method="post" id="adminLoginForm" novalidate>
+        <?php echo csrf_token_field(); ?>
         <div class="mb-3">
           <label class="form-label">Admin ID</label>
           <input class="form-control" name="admin_id" type="text" placeholder="Enter admin ID">
