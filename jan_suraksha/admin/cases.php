@@ -13,11 +13,10 @@ $anonymous_filter = trim($_GET['anonymous_filter'] ?? '');
 $where  = [];
 $params = [];
 $types  = '';
-$sql    = 'SELECT c.id, c.complaint_code, c.complainant_name, c.crime_type, c.status, c.created_at
+// Phase 2: Include urgent fields and sort urgent complaints first
+$sql = 'SELECT c.id, c.complaint_code, c.complainant_name, c.crime_type, c.status, c.is_anonymous, c.anonymous_tracking_id, 
+           c.is_urgent, c.urgency_justification, c.urgent_marked_at, c.created_at
            FROM complaints c';
-
-// This query correctly selects the complaint ID as 'id' and includes anonymous fields
-$sql = 'SELECT c.id, c.complaint_code, c.complainant_name, c.crime_type, c.status, c.is_anonymous, c.anonymous_tracking_id FROM complaints c';
 
 if($q){ 
     $where[] = '(c.complaint_code LIKE ? OR c.complainant_name LIKE ? OR c.anonymous_tracking_id LIKE ?)'; 
@@ -46,7 +45,8 @@ if($anonymous_filter === 'regular'){
 if ($where) {
     $sql .= ' WHERE ' . implode(' AND ', $where);
 }
-$sql .= ' ORDER BY c.created_at DESC LIMIT 50';
+// Phase 2: Sort urgent complaints to top, then by creation date
+$sql .= ' ORDER BY c.is_urgent DESC, c.created_at DESC LIMIT 50';
 
 $stmt = $mysqli->prepare($sql);
 if ($params) { $stmt->bind_param($types, ...$params); }
@@ -229,6 +229,50 @@ $active_filters = count(array_filter([$q, $crime_type, $status]));
         .admin-pill-status-in-progress { background: rgba(245,158,11,0.2); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
         .admin-pill-status-resolved { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
         .admin-pill-status-closed { background: rgba(34,197,94,0.2); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+
+        /* Phase 2: Urgent Complaint Styles */
+        .urgent-badge {
+            background: linear-gradient(135deg, #d32f2f, #c62828);
+            color: #ffffff;
+            padding: 0.375rem 0.875rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            box-shadow: 0 4px 12px rgba(211,47,47,0.3);
+            animation: urgentPulse 2s ease-in-out infinite;
+        }
+        .urgent-badge i {
+            font-size: 0.875rem;
+            animation: urgentShake 0.5s ease-in-out infinite;
+        }
+        @keyframes urgentPulse {
+            0%, 100% { box-shadow: 0 4px 12px rgba(211,47,47,0.3); }
+            50% { box-shadow: 0 4px 20px rgba(211,47,47,0.6); }
+        }
+        @keyframes urgentShake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+        .urgent-complaint-row {
+            background: linear-gradient(145deg, rgba(255,243,243,0.15), rgba(255,230,230,0.1)) !important;
+            border-left: 4px solid #d32f2f !important;
+            transition: all 0.3s ease;
+        }
+        .urgent-complaint-row:hover {
+            background: linear-gradient(145deg, rgba(255,243,243,0.25), rgba(255,230,230,0.2)) !important;
+            transform: translateX(4px);
+            box-shadow: 0 8px 25px rgba(211,47,47,0.2);
+        }
+        [data-theme="light"] .urgent-complaint-row {
+            background: linear-gradient(145deg, #fff3f3, #ffe6e6) !important;
+        }
+        [data-theme="light"] .urgent-complaint-row:hover {
+            background: linear-gradient(145deg, #ffe6e6, #ffd6d6) !important;
+        }
 
         /* Stats Bar */
         .admin-stats-bar {
@@ -484,13 +528,25 @@ $active_filters = count(array_filter([$q, $crime_type, $status]));
                         $priority     = strtolower($r['priority'] ?? 'low');
                         $statusSlug   = str_replace(' ', '-', strtolower($r['status']));
                         $statusClass  = 'admin-pill-status-' . $statusSlug;
+                        $isUrgent     = ($r['is_urgent'] == 1);
+                        $cardClass    = $isUrgent ? 'admin-card urgent-complaint-row h-100 p-4' : 'admin-card h-100 p-4';
                         ?>
                         <div class="col-lg-6 col-xl-4">
-                            <div class="admin-card h-100 p-4">
+                            <div class="<?= $cardClass ?>">
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <div>
+                                        <?php if ($isUrgent): ?>
+                                        <span class="urgent-badge mb-2">
+                                            <i class="bi bi-exclamation-triangle-fill"></i>
+                                            URGENT
+                                        </span>
+                                        <?php endif; ?>
                                         <h5 class="mb-1 fw-bold" style="color: var(--text-primary);">
-                                            FIR #<?= htmlspecialchars($r['complaint_code']) ?>
+                                            <?php if ($r['is_anonymous'] == 1 && !empty($r['anonymous_tracking_id'])): ?>
+                                                ID: <?= htmlspecialchars($r['anonymous_tracking_id']) ?>
+                                            <?php else: ?>
+                                                FIR #<?= htmlspecialchars($r['complaint_code']) ?>
+                                            <?php endif; ?>
                                         </h5>
                                         <div class="admin-pill admin-pill-priority-<?= $priority ?>">
                                             <?= strtoupper($r['priority'] ?? 'LOW') ?> PRIORITY

@@ -113,6 +113,7 @@ if(isset($_GET['success']) && $_GET['success'] == 1) {
     $success_msg = "Case file updated successfully!";
 }
 
+// Phase 2: Include urgent fields in query
 $stmt = $mysqli->prepare("
     SELECT c.*, cr.id AS criminal_id, cr.full_name, cr.fathers_name, cr.aliases, cr.dob, cr.physical_description, cr.last_known_address, cr.punishment_section, cr.punishment_description, cr.mugshot
     FROM complaints c
@@ -176,6 +177,60 @@ $current_page = 'cases.php'; // CORRECTED
         .info-grid { display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem; align-items: center; }
         .info-label { color: #8b949e; font-weight: 500; }
         .mugshot { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+        
+        /* Phase 2: Urgent Complaint Styles */
+        .urgent-badge-large {
+            background: linear-gradient(135deg, #d32f2f, #c62828);
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 6px 20px rgba(211,47,47,0.4);
+            animation: urgentPulseLarge 2s ease-in-out infinite;
+        }
+        @keyframes urgentPulseLarge {
+            0%, 100% { box-shadow: 0 6px 20px rgba(211,47,47,0.4); }
+            50% { box-shadow: 0 8px 30px rgba(211,47,47,0.7); }
+        }
+        .urgency-section {
+            background: linear-gradient(145deg, rgba(255,243,243,0.15), rgba(255,230,230,0.1));
+            border: 2px solid #d32f2f;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 25px rgba(211,47,47,0.2);
+        }
+        html.light-theme .urgency-section {
+            background: linear-gradient(145deg, #fff3f3, #ffe6e6);
+        }
+        .urgency-section h5 {
+            color: #d32f2f;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .urgency-section .urgency-content {
+            background: rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        html.light-theme .urgency-section .urgency-content {
+            background: rgba(0,0,0,0.05);
+        }
+        .urgency-timestamp {
+            color: var(--bs-body-color);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -257,6 +312,34 @@ $current_page = 'cases.php'; // CORRECTED
                                 </div>
                             </div>
                         </div>
+
+                        <?php if ($case['is_urgent'] == 1): ?>
+                        <!-- Phase 2: Urgency Information Section -->
+                        <div class="urgency-section">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <span class="urgent-badge-large">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    URGENT COMPLAINT
+                                </span>
+                            </div>
+                            
+                            <h5>
+                                <i class="bi bi-chat-left-text-fill"></i>
+                                Urgency Justification
+                            </h5>
+                            <div class="urgency-content">
+                                <p class="mb-0"><?= htmlspecialchars($case['urgency_justification'] ?? 'No justification provided.') ?></p>
+                            </div>
+                            
+                            <?php if (!empty($case['urgent_marked_at'])): ?>
+                            <div class="urgency-timestamp">
+                                <i class="bi bi-clock-fill"></i>
+                                <strong>Marked Urgent:</strong>
+                                <?= date('M d, Y \a\t g:i A', strtotime($case['urgent_marked_at'])) ?>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
 
                         <div class="card p-3 mb-4">
                             <h5 class="mb-3">Accused/Suspect Details</h5>
