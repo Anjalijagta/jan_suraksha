@@ -86,7 +86,7 @@ function sendUrgentComplaintEmail($complaintData) {
         $textBody = getUrgentComplaintEmailText($emailData);
         
         // Create email subject
-        $subject = '🚨 URGENT Complaint Received - ' . $emailData['complaintCode'];
+        $subject = '[URGENT] Complaint Received - ' . $emailData['complaintCode'];
         
         // Attempt to send email
         $result = sendEmail(ADMIN_EMAIL, $subject, $htmlBody, $textBody);
