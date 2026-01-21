@@ -121,6 +121,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                 $stmt->bind_param('issssssssiiss', $uid, $code, $name, $mobile, $crime, $date, $location, $finalDescription, $uploadedFile, $status, $urgentFlag, $sanitizedJustification, $urgentTimestamp);
 
                 if ($stmt->execute()) {
+                    // Get the inserted complaint ID
+                    $complaintId = $mysqli->insert_id;
+                    
+                    // Phase 3: Send urgent complaint email notification
+                    if ($isUrgent) {
+                        try {
+                            // Include email functions
+                            require_once __DIR__ . '/includes/email-functions.php';
+                            
+                            // Prepare complaint data for email
+                            $emailComplaintData = [
+                                'complaint_id' => $complaintId,
+                                'complaint_code' => $isAnonymous ? $anonymousTrackingId : $code,
+                                'crime_type' => $crime,
+                                'location' => $location,
+                                'date_filed' => date('Y-m-d H:i:s'),
+                                'urgency_justification' => $urgencyJustification,
+                                'is_anonymous' => $isAnonymous ? 1 : 0
+                            ];
+                            
+                            // Send email notification (non-blocking - don't fail if email fails)
+                            $emailResult = sendUrgentComplaintEmail($emailComplaintData);
+                            
+                            // Log the result (optional - silently fails if logging not configured)
+                            if (function_exists('logEmailAttempt')) {
+                                logEmailAttempt($emailComplaintData['complaint_code'], $emailResult);
+                            }
+                            
+                            // Note: We don't show email errors to the user
+                            // The complaint is successfully filed regardless of email status
+                            
+                        } catch (Exception $e) {
+                            // Silently log error - don't show to user, don't fail submission
+                            error_log('Phase 3 - Urgent email notification failed: ' . $e->getMessage());
+                        }
+                    }
+                    
                     // Redirect to appropriate success page
                     if ($isAnonymous) {
                         header('Location: anonymous-success.php?tracking_id=' . urlencode($anonymousTrackingId));
