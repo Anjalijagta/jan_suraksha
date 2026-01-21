@@ -137,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                                 'crime_type' => $crime,
                                 'location' => $location,
                                 'date_filed' => date('Y-m-d H:i:s'),
-                                'urgency_justification' => $urgencyJustification,
+                                'urgency_justification' => $sanitizedJustification,
                                 'is_anonymous' => $isAnonymous ? 1 : 0
                             ];
                             
