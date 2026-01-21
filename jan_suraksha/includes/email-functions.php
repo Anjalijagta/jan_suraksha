@@ -430,8 +430,18 @@ function sendTestEmail($testEmail = null) {
     }
     
     // Prepare test email data
+    $complaintCode = 'TEST-' . date('Y') . '-';
+    try {
+        $randomBytes = random_bytes(3);
+        $complaintCode .= strtoupper(bin2hex($randomBytes));
+    } catch (\Throwable $e) {
+        // Fallback: use a non-cryptographic random hex code to avoid exceptions breaking the flow
+        $fallback = strtoupper(dechex(mt_rand(0, 0xFFFFFF)));
+        $complaintCode .= str_pad($fallback, 6, '0', STR_PAD_LEFT);
+    }
+    
     $testData = [
-        'complaintCode' => 'TEST-' . date('Y') . '-' . strtoupper(bin2hex(random_bytes(3))),
+        'complaintCode' => $complaintCode,
         'crimeType' => 'Test Crime Type',
         'location' => 'Test Location',
         'dateFiled' => date('F j, Y \a\t g:i A'),
