@@ -536,7 +536,7 @@ $active_filters = count(array_filter([$q, $crime_type, $status]));
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <div>
                                         <?php if ($isUrgent): ?>
-                                        <span class="urgent-badge mb-2">
+                                        <span class="urgent-badge mb-2" role="status" aria-label="Urgent complaint">
                                             <i class="bi bi-exclamation-triangle-fill"></i>
                                             URGENT
                                         </span>
