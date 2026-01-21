@@ -1009,6 +1009,12 @@ require_once __DIR__ . '/config.php';
 </head>
 <body data-theme="light">
 
+<!-- Floating Chatbot (only show on non-help pages) -->
+<?php if (basename($_SERVER['PHP_SELF']) !== 'help.php') { ?>
+    <?php include 'chatbot-toggle.php'; ?>
+<?php } ?>
+
+
 <header class="border-bottom">
  <!-- Top white bar -->
  <div class="top-bar">
@@ -1085,11 +1091,6 @@ require_once __DIR__ . '/config.php';
 <li class="nav-item">
             <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'blog.php' ? 'active' : ''; ?>" href="blog.php">
               <i class="bi bi-journal-text me-1"></i> Blog
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'help.php' ? 'active' : ''; ?>" href="help.php">
-              <i class="bi bi-chat-dots-fill me-1"></i> Help
             </a>
           </li>
           <li class="nav-item">
