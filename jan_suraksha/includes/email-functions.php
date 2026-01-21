@@ -127,7 +127,12 @@ function prepareEmailData($complaintData) {
         : date('F j, Y \a\t g:i A');
     
     // Generate admin panel link
-    $adminPanelLink = getAdminPanelUrl($complaintData['complaint_id']);
+    if (function_exists('getAdminPanelUrl')) {
+        $adminPanelLink = getAdminPanelUrl($complaintData['complaint_id']);
+    } else {
+        // Fallback if configuration function is unavailable
+        $adminPanelLink = null;
+    }
     
     // Check if anonymous
     $isAnonymous = isset($complaintData['is_anonymous']) && $complaintData['is_anonymous'] == 1;
