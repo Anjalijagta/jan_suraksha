@@ -12,11 +12,14 @@ If you discover a security vulnerability in this project, please report it respo
 Public disclosure may expose users or sensitive system behavior.
 
 ### How to Report
+
 Please report security issues privately by contacting the project maintainers through:
+
 - GitHub direct message to the repository owner/maintainers, or
 - Any official contact method provided in the repository (if available)
 
 When reporting, include:
+
 - A clear description of the vulnerability
 - Steps to reproduce the issue (if possible)
 - Expected vs actual behavior
@@ -28,6 +31,7 @@ When reporting, include:
 ## Scope
 
 Security-related issues may include (but are not limited to):
+
 - Authentication and authorization flaws
 - Data leakage or privacy issues
 - Unsafe file uploads
