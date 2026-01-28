@@ -60,7 +60,7 @@ function getComplaintsThisMonth($mysqli) {
  * @return int Number of complaints this week
  */
 function getComplaintsThisWeek($mysqli) {
-    $sql = "SELECT COUNT(*) as total FROM tblcomplaints 
+    $sql = "SELECT COUNT(*) as total FROM complaints 
             WHERE date_filed >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
     $result = $mysqli->query($sql);
     
