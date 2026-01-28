@@ -83,7 +83,7 @@ function getComplaintsThisWeek($mysqli) {
  * @return array Associative array with status counts
  */
 function getComplaintsByStatus($mysqli) {
-    $sql = "SELECT status, COUNT(*) as count FROM tblcomplaints 
+    $sql = "SELECT status, COUNT(*) as count FROM complaints 
             GROUP BY status";
     $result = $mysqli->query($sql);
     
