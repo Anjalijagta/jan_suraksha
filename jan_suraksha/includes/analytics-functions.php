@@ -149,7 +149,7 @@ function getUrgentComplaintsRatio($mysqli) {
                 SUM(CASE WHEN is_urgent = 1 THEN 1 ELSE 0 END) as urgent_count,
                 SUM(CASE WHEN is_urgent = 0 OR is_urgent IS NULL THEN 1 ELSE 0 END) as normal_count,
                 COUNT(*) as total_count
-            FROM tblcomplaints";
+            FROM complaints";
     $result = $mysqli->query($sql);
     
     if ($result === false) {
