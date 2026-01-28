@@ -43,7 +43,7 @@ function sendErrorResponse($code, $message) {
 // SECURITY: Admin Authentication Check
 // ============================================
 if (empty($_SESSION['admin_id'])) {
-    sendErrorResponse(401, 'Unauthorized access - Admin login required');
+    sendErrorResponse(403, 'Unauthorized access - Admin login required');
 }
 
 // ============================================

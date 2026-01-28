@@ -83,22 +83,23 @@ function getComplaintsThisWeek($mysqli) {
  * @return array Associative array with status counts
  */
 function getComplaintsByStatus($mysqli) {
-    $sql = "SELECT status, COUNT(*) as count FROM complaints 
-            GROUP BY status";
-    $result = $mysqli->query($sql);
-    
-    if ($result === false) {
-        error_log('Analytics Error - getComplaintsByStatus: ' . $mysqli->error);
-        return [];
-    }
-    
-    // Initialize default status counts
+    // Initialize default status counts so callers always receive expected keys
     $statusCounts = [
         'submitted' => 0,
         'in_progress' => 0,
         'resolved' => 0,
         'closed' => 0
     ];
+    
+    $sql = "SELECT status, COUNT(*) as count FROM complaints 
+            GROUP BY status";
+    $result = $mysqli->query($sql);
+    
+    if ($result === false) {
+        error_log('Analytics Error - getComplaintsByStatus: ' . $mysqli->error);
+        // Return default zero counts on error to avoid undefined index notices
+        return $statusCounts;
+    }
     
     // Map database status values to lowercase with underscores
     while ($row = $result->fetch_assoc()) {
